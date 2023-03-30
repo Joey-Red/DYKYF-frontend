@@ -227,7 +227,7 @@ function CanvasComponent() {
       <div className="relative justify-center flex flex-center items-center">
         <canvas
           // bg-chessTexture bg-center
-          className="bg-neutral-900"
+          className="bg-neutral-900  border-white border-2 rounded"
           ref={canvasRef}
           width={canvasWidth}
           height={canvasHeight}
