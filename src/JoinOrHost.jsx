@@ -78,7 +78,7 @@ function JoinOrHost(props) {
           <div className="flex flex-col border-2 border-white p-4 rounded m-4 w-[500px]">
             {foundRoom === true && questionsAnswered === false ? (
               <div className="w-full flex flex-col justify-center items-center">
-                <PreGame />
+                <PreGame roomName={roomName} />
               </div>
             ) : (
               <>
