@@ -7,6 +7,6 @@ module.exports = {
         chessTexture: "url('./src/assets/misc/texture.png')",
       },
     },
-    plugins: [],
+    plugins: require("tailwind-scrollbar")({ nocompatible: true }),
   },
 };

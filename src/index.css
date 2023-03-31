@@ -4,3 +4,22 @@
 .text-style {
   font-family: "Permanent Marker", cursive;
 }
+/* width */
+::-webkit-scrollbar {
+  width: 14px;
+  border: solid black 4px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border: solid black 4px;
+  border-radius: 9999px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #ff0101;
+  border: solid black 4px;
+  border-radius: 9999px;
+}

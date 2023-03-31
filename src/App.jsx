@@ -7,6 +7,7 @@ import bannerTransparent from "./assets/misc/BannerTransparent.png";
 function App() {
   let [foundRoom, setFoundRoom] = useState(false);
   let [questionsAnswered, setQuestionsAnswered] = useState(false);
+  let [isHost, setIsHost] = useState(false);
   // let [questionsAnswered, setQuestionsAnswered] = useState(false);
   return (
     <div className="h-screen overflow-hidden bg-neutral-900 text-white">
@@ -16,6 +17,8 @@ function App() {
           setFoundRoom={setFoundRoom}
           questionsAnswered={questionsAnswered}
           setQuestionsAnswered={setQuestionsAnswered}
+          isHost={isHost}
+          setIsHost={setIsHost}
         />
       </div>
       {foundRoom && questionsAnswered && (

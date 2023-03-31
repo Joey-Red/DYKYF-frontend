@@ -8,11 +8,17 @@ import Bots from "./Bots";
 function JoinOrHost(props) {
   const [players, setPlayers] = useState([]);
   const [roomName, setRoomName] = useState("");
-  const [manualJoin, setManualJoin] = useState("");
-  const [message, setMessage] = useState("");
-  const [incMessages, setIncMessages] = useState([]);
-  let { foundRoom, setFoundRoom, questionsAnswered, setQuestionsAnswered } =
-    props;
+  // const [manualJoin, setManualJoin] = useState("");
+  const [roomTakenErr, setRoomTakenErr] = useState(false);
+  const [roomDoesntExistErr, setRoomDoesntExistErr] = useState(false);
+  let {
+    foundRoom,
+    setFoundRoom,
+    questionsAnswered,
+    setQuestionsAnswered,
+    isHost,
+    setIsHost,
+  } = props;
   useEffect(() => {
     socket.on("connect", () => {
       console.log("connected to server");
@@ -21,45 +27,55 @@ function JoinOrHost(props) {
     socket.on("disconnect", () => {
       console.log("disconnected from server");
     });
-    socket.on("chat message", (message) => {
-      setIncMessages((incMessages) => [
-        ...incMessages,
-        { id: uuidv4(), message },
-      ]);
 
-      // console.log(incMessages);
-    });
     socket.on("players", (players) => {
       setPlayers(players);
     });
-  }, []);
-  useEffect(() => {
-    socket.on("chat message", (message) => {
-      console.log("FIRE");
-      setIncMessages((incMessages) => [...incMessages, message]);
+    socket.on("roomCreated", (data) => {
+      setFoundRoom(true);
+      setIsHost(true);
+    });
+    socket.on("roomNameTaken", (data) => {
+      console.log(data.error);
+      setRoomTakenErr(true);
+    });
+    socket.on("joinedRoomFail", (data) => {
+      setRoomDoesntExistErr(true);
+    });
+    socket.on("joinedRoomSuccess", (data) => {
+      setFoundRoom(true);
     });
   }, []);
 
-  function sendMessage(roomName, message) {
-    if (message !== "") {
-      setIncMessages((incMessages) => [
-        ...incMessages,
-        { id: uuidv4(), message },
-      ]);
-      socket.emit("chat message", message, roomName);
-      setMessage("");
-    }
-  }
+  useEffect(() => {
+    console.log(players);
+  }, [players]);
 
+  useEffect(() => {
+    let timer;
+    if (roomTakenErr) {
+      timer = setTimeout(() => {
+        setRoomTakenErr(false);
+      }, 3000);
+    }
+    return () => clearTimeout(timer);
+  }, [roomTakenErr]);
+  useEffect(() => {
+    let timer;
+    if (roomDoesntExistErr) {
+      timer = setTimeout(() => {
+        setRoomDoesntExistErr(false);
+      }, 3000);
+    }
+    return () => clearTimeout(timer);
+  }, [roomDoesntExistErr]);
   function handleCreateRoom() {
     socket.emit("create room", roomName);
-    setFoundRoom(true);
+    // setFoundRoom(true);
   }
 
   function handleJoinRoom(roomName) {
-    setRoomName(roomName);
     socket.emit("join room", roomName);
-    setFoundRoom(true);
   }
 
   return (
@@ -78,7 +94,13 @@ function JoinOrHost(props) {
           <div className="flex flex-col border-2 border-white p-4 rounded m-4 w-[500px]">
             {foundRoom === true && questionsAnswered === false ? (
               <div className="w-full flex flex-col justify-center items-center">
-                <PreGame roomName={roomName} />
+                <PreGame
+                  socket={socket}
+                  io={io}
+                  isHost={isHost}
+                  setQuestionsAnswered={setQuestionsAnswered}
+                  roomName={roomName}
+                />
               </div>
             ) : (
               <>
@@ -88,11 +110,14 @@ function JoinOrHost(props) {
                 >
                   <label>
                     <p>Create a new room:</p>
+                    {roomTakenErr && (
+                      <p className="text-red-500 font-bold">Room name taken</p>
+                    )}
                     <input
                       className="rounded text-black"
                       placeholder="Friends4Life"
                       type="text"
-                      value={roomName}
+                      // value={roomName}
                       onChange={(event) => setRoomName(event.target.value)}
                     />
                     <button
@@ -107,33 +132,24 @@ function JoinOrHost(props) {
                   <li>
                     <label>
                       <p>Join a room:</p>
+                      {roomDoesntExistErr && (
+                        <p className="text-red-500">This room doesn't exist.</p>
+                      )}
                       <input
                         className="rounded text-black"
                         placeholder="Hurry up and send the code dude"
                         type="text"
-                        value={manualJoin}
-                        onChange={(event) => setManualJoin(event.target.value)}
+                        // value={roomName}
+                        onChange={(event) => setRoomName(event.target.value)}
                       />
                       <button
                         className="p-2 border-white"
-                        onClick={() => handleJoinRoom(manualJoin)}
+                        onClick={() => handleJoinRoom(roomName)}
                       >
                         Join
                       </button>
                     </label>
                   </li>
-
-                  {/* <li>
-                <button className="p-2 border-white" onClick={() => handleJoinRoom("default")}>
-                  Default
-                </button>
-              </li>
-              <li>
-                <button className="p-2 border-white" onClick={() => handleJoinRoom("room1")}>Room 1</button>
-              </li>
-              <li>
-                <button className="p-2 border-white" onClick={() => handleJoinRoom("room2")}>Room 2</button>
-              </li> */}
                 </ul>
               </>
             )}
