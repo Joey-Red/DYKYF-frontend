@@ -3,6 +3,7 @@ import axios from "axios";
 import bannerTransparent from "./assets/misc/BannerTransparent.png";
 import LoadingSpinner from "./assets/misc/LoadingSpinner";
 import ChatRoom from "./ChatRoom";
+
 function PreGame(props) {
   let [questions, setQuestions] = useState([]);
   let [loaded, setLoaded] = useState(false);
@@ -24,9 +25,18 @@ function PreGame(props) {
   let [dTwo, setDTwo] = useState(false);
   let [dThree, setDThree] = useState(false);
   let [players, setPlayers] = useState([]);
-  let [customUsername, setCustomUsername] = useState("Anon");
+  // let [customUsername, setCustomUsername] = useState("Anon");
   let [allPlayersReady, setAllPlayersReady] = useState(false);
-  let { roomName, isHost, setQuestionsAnswered, socket, io } = props;
+  let {
+    roomName,
+    isHost,
+    setQuestionsAnswered,
+    socket,
+    io,
+    username,
+    roomSize,
+    setRoomSize,
+  } = props;
   useEffect(() => {
     axios
       .get("http://localhost:3001/get-questions")
@@ -54,39 +64,20 @@ function PreGame(props) {
     socket.on("players", (players) => {
       setPlayers(players);
     });
-    socket.on("allPlayersReady", () => {
+    socket.on("allPlayersReady", (data) => {
       setAllPlayersReady(true);
     });
+    socket.on("start game", (data) => {
+      setRoomSize(data.roomSize);
+      setQuestionsAnswered(true);
+    });
   }, []);
-
-  // let doneAnswering = () => {
-  //   axios
-  //     .post("http://localhost:3001/post-answers", {
-  //       roomName: roomName,
-  //       questionOne: questions[0],
-  //       answerOne: answerOne,
-  //       questionTwo: questions[1],
-  //       answerTwo: answerTwo,
-  //       questionsThree: questions[2],
-  //       answerThree: answerThree,
-  //     })
-  //     .then((res) => {
-  //       console.log(res);
-  //     })
-  //     .catch(function (err) {
-  //       console.log(err);
-  //     });
-  //   if (answersSubmitted) {
-  //     return;
-  //   }
-  //   setAnswersSubmitted(true);
-  // };
 
   let doneAnswering = () => {
     socket.emit("submitAnswers", {
       roomName: roomName,
       socketId: socket.id,
-      username: customUsername,
+      // username: customUsername,
       questionOne: questions[0],
       answerOne: answerOne,
       questionTwo: questions[1],
@@ -97,21 +88,35 @@ function PreGame(props) {
     setAnswersSubmitted(true);
   };
 
-  // useEffect(() => {
-  //   if (
-  //     answerOne === null ||
-  //     answerOne === undefined ||
-  //     answerTwo === null ||
-  //     answerTwo === undefined ||
-  //     answerThree === null ||
-  //     answerThree === undefined ||
-  //     answersSubmitted === true
-  //   ) {
-  //     setButtonDisabled(true);
-  //   } else {
-  //     setButtonDisabled(false);
-  //   }
-  // }, [answerOne, answerTwo, answerThree]);
+  useEffect(() => {
+    if (
+      answerOne === null ||
+      answerOne === undefined ||
+      answerTwo === null ||
+      answerTwo === undefined ||
+      answerThree === null ||
+      answerThree === undefined ||
+      answersSubmitted === true
+    ) {
+      setButtonDisabled(true);
+    } else {
+      setButtonDisabled(false);
+    }
+  }, [answerOne, answerTwo, answerThree]);
+  let startGame = () => {
+    let data = {
+      roomName: roomName,
+      socketId: socket.id,
+      // username: customUsername,
+      questionOne: questions[0],
+      answerOne: answerOne,
+      questionTwo: questions[1],
+      answerTwo: answerTwo,
+      questionsThree: questions[2],
+      answerThree: answerThree,
+    };
+    socket.emit("all players ready", data);
+  };
   return (
     <div>
       <img src={bannerTransparent} className="h-[200px] flex mx-auto" alt="" />
@@ -348,7 +353,7 @@ function PreGame(props) {
               </ul>
             </div>
           </div>
-          <label className="mt-2" htmlFor="username">
+          {/* <label className="mt-2" htmlFor="username">
             Enter Username
           </label>
           <input
@@ -358,10 +363,11 @@ function PreGame(props) {
             onChange={(e) => {
               setCustomUsername(e.target.value);
             }}
-          />
+          /> */}
           <button
             // disabled={buttonDisabled}
-            onClick={() => doneAnswering()}
+            // onClick={() => doneAnswering()}
+            onClick={doneAnswering()}
             className="mt-4 p-2 mx-auto w-full rounded bg-[#FF0000] font-bold border-black border-4 text-black text-2xl"
           >
             I'm done.
@@ -387,14 +393,20 @@ function PreGame(props) {
       )}
       {isHost && allPlayersReady && (
         <button
-          // disabled={buttonDisabled}
-          // onClick={() => doneAnswering()}
+          disabled={buttonDisabled}
+          onClick={() => startGame()}
           className="mt-4 p-2 mx-auto w-full rounded bg-[#FF0000] font-bold border-black border-4 text-black text-2xl"
         >
           Start Game (You're the host)
         </button>
       )}
-      <ChatRoom socket={socket} io={io} roomName={roomName} />
+      {/* <ChatRoom
+        socket={socket}
+        io={io}
+        roomName={roomName}
+        // customUsername={customUsername}
+        username={username}
+      /> */}
     </div>
   );
 }

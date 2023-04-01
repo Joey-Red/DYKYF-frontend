@@ -9,17 +9,19 @@ import mortMirror from "./assets/sheets/mortMirror.png";
 import vitaMirror from "./assets/sheets/vitaMirror.png";
 import Questions from "./Questions";
 import shadowBox from "./assets/misc/shadow_2.png";
-function CanvasComponent() {
+function CanvasComponent(props) {
+  let { roomName, username, isHost, socket, io } = props;
+  const [players, setPlayers] = useState({});
   const [frame, setFrame] = useState(0);
-  const [spriteX, setSpriteX] = useState(0);
-  const [spriteY, setSpriteY] = useState(0);
+  const [spriteX, setSpriteX] = useState(500);
+  const [spriteY, setSpriteY] = useState(500);
   const [direction, setDirection] = useState("right");
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
   const imageRef = useRef(null);
   const mirrorRef = useRef(null);
   const shadowRef = useRef(null);
-
+  const usernameRef = useRef("");
   const numFrames = 24;
   const canvasWidth = 1000;
   const canvasHeight = 1000;
@@ -27,9 +29,45 @@ function CanvasComponent() {
   const spriteHeight = 40;
 
   useEffect(() => {
+    // socket.on("update player", ( => {
+    //   // setData(;
+    // });
+    socket.on("update player", (data) => {
+      const {
+        username,
+        x,
+        y,
+        frameHeight,
+        frameWidth,
+        spriteX,
+        spriteY,
+        roomName,
+      } = data.data;
+      setPlayers((prevPlayers) => ({
+        ...prevPlayers,
+        [username]: {
+          x: x,
+          y: y,
+          frameHeight: frameHeight,
+          frameWidth: frameWidth,
+          roomName: roomName,
+          spriteHeight: spriteHeight,
+          spriteWidth: spriteWidth,
+          spriteX: spriteX,
+          spriteY: spriteY,
+        },
+      }));
+    });
+    socket.on("disconnect", () => {
+      console.log("disconnected from server");
+    });
+  }, []);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     ctxRef.current = ctx;
+    usernameRef.current = username;
   }, []);
 
   function drawSprite(direction) {
@@ -106,6 +144,26 @@ function CanvasComponent() {
     // every 5 words add 1 rem height
     wrapText(ctx, text, 500, textY / 2 - textLength, maxWidth, lineHeight);
     ctx.drawImage(shadow, spriteX, spriteY, spriteWidth, spriteHeight);
+
+    // DRAW OTHER PLAYERS
+    for (const [username, player] of Object.entries(players)) {
+      // Skip drawing the current user's own character
+      if (username === usernameRef.current) continue;
+
+      // Draw the player's sprite on the canvas
+      ctx.drawImage(
+        mirror,
+        x,
+        y,
+        frameWidth,
+        frameHeight,
+        player.spriteX,
+        player.spriteY,
+        player.spriteWidth,
+        player.spriteHeight
+      );
+    }
+
     if (direction === "right") {
       ctx.drawImage(
         image,
@@ -167,36 +225,103 @@ function CanvasComponent() {
     };
   }, [frame, spriteX, spriteY]);
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setFrame((frame) => (frame + 1) % numFrames);
+    }, 125);
+
+    // Return a cleanup function to clear the interval when the component unmounts
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
   function handleKeyDown(event) {
+    let image = imageRef.current;
+    let mirror = mirrorRef.current;
+    let shadow = shadowRef.current;
+
+    const frameWidth = image.width / numFrames;
+    const frameHeight = image.height;
+    const x = frame * frameWidth;
+    const y = 0;
     // setFrame((frame) => frame + 1);
     const speed = 15;
     switch (event.code) {
       case "ArrowRight":
         if (spriteX < canvasWidth - spriteWidth) {
           setSpriteX((prevX) => prevX + speed);
-          setFrame((frame) => (frame + 1) % numFrames);
+          // setFrame((frame) => (frame + 1) % numFrames);
           setDirection("right");
+          socket.emit("player moved", {
+            username,
+            roomName,
+            x,
+            y,
+            frameWidth,
+            frameHeight,
+            spriteX,
+            spriteY,
+            spriteWidth,
+            spriteHeight,
+          });
         }
         break;
       case "ArrowLeft":
         if (spriteX > 0) {
           setSpriteX((prevX) => prevX - speed);
-          setFrame((frame) => (frame + 1) % numFrames);
+          // setFrame((frame) => (frame + 1) % numFrames);
           setDirection("left");
+          socket.emit("player moved", {
+            username,
+            roomName,
+            x,
+            y,
+            frameWidth,
+            frameHeight,
+            spriteX,
+            spriteY,
+            spriteWidth,
+            spriteHeight,
+          });
         }
         break;
       case "ArrowUp":
         if (spriteY > 0) {
           setSpriteY((prevY) => prevY - speed);
-          setFrame((frame) => (frame + 1) % numFrames);
+          // setFrame((frame) => (frame + 1) % numFrames);
           setDirection("up");
+          socket.emit("player moved", {
+            username,
+            roomName,
+            x,
+            y,
+            frameWidth,
+            frameHeight,
+            spriteX,
+            spriteY,
+            spriteWidth,
+            spriteHeight,
+          });
         }
         break;
       case "ArrowDown":
         if (spriteY < canvasHeight - spriteHeight) {
           setSpriteY((prevY) => prevY + speed);
-          setFrame((frame) => (frame + 1) % numFrames);
+          // setFrame((frame) => (frame + 1) % numFrames);
           drawSprite("down");
+          socket.emit("player moved", {
+            username,
+            roomName,
+            x,
+            y,
+            frameWidth,
+            frameHeight,
+            spriteX,
+            spriteY,
+            spriteWidth,
+            spriteHeight,
+          });
         }
         break;
       default:

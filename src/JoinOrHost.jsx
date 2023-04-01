@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
-import io from "socket.io-client";
-const socket = io("http://localhost:3001");
+
 import { v4 as uuidv4 } from "uuid";
 import bannerTransparent from "./assets/misc/BannerTransparent.png";
 import PreGame from "./PreGame";
 import Bots from "./Bots";
 function JoinOrHost(props) {
   const [players, setPlayers] = useState([]);
-  const [roomName, setRoomName] = useState("");
   // const [manualJoin, setManualJoin] = useState("");
   const [roomTakenErr, setRoomTakenErr] = useState(false);
   const [roomDoesntExistErr, setRoomDoesntExistErr] = useState(false);
@@ -18,14 +16,21 @@ function JoinOrHost(props) {
     setQuestionsAnswered,
     isHost,
     setIsHost,
+    username,
+    socket,
+    io,
+    roomName,
+    setRoomName,
+    setRoomSize,
+    roomSize,
   } = props;
   useEffect(() => {
     socket.on("connect", () => {
-      console.log("connected to server");
+      // console.log("connected to server");
       socket.emit("new player");
     });
     socket.on("disconnect", () => {
-      console.log("disconnected from server");
+      // console.log("disconnected from server");
     });
 
     socket.on("players", (players) => {
@@ -47,9 +52,9 @@ function JoinOrHost(props) {
     });
   }, []);
 
-  useEffect(() => {
-    console.log(players);
-  }, [players]);
+  // useEffect(() => {
+  //   console.log(players);
+  // }, [players]);
 
   useEffect(() => {
     let timer;
@@ -100,6 +105,9 @@ function JoinOrHost(props) {
                   isHost={isHost}
                   setQuestionsAnswered={setQuestionsAnswered}
                   roomName={roomName}
+                  username={username}
+                  setRoomSize={setRoomSize}
+                  roomSize={roomSize}
                 />
               </div>
             ) : (
