@@ -7,6 +7,10 @@ import douxMirror from "./assets/sheets/douxMirror.png";
 import tardMirror from "./assets/sheets/tardMirror.png";
 import mortMirror from "./assets/sheets/mortMirror.png";
 import vitaMirror from "./assets/sheets/vitaMirror.png";
+import tardStill from "./assets/charbuttons/tardStill.png";
+import vitaStill from "./assets/charbuttons/vitaStill.png";
+import mortStill from "./assets/charbuttons/mortStill.png";
+import douxStill from "./assets/charbuttons/douxStill.png";
 import { wrapText } from "./canvasTextWrapper";
 import shadowBox from "./assets/misc/shadow_2.png";
 import {
@@ -20,6 +24,8 @@ import {
 
 function CanvasComponent(props) {
   let { roomName, username, isHost, socket, io } = props;
+  let [chosenChar, setChosenChar] = useState(tard);
+  let [chosenCharMirror, setChosenCharMirror] = useState(tardMirror);
   const [players, setPlayers] = useState({});
   const [frame, setFrame] = useState(0);
   const [spriteX, setSpriteX] = useState(500);
@@ -27,10 +33,20 @@ function CanvasComponent(props) {
   const [direction, setDirection] = useState("right");
   const [isRunning, setIsRunning] = useState(false);
   const [refreshVar, setRefreshVar] = useState(20);
+  let [showColorMenu, setShowColorMenu] = useState(false);
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
-  const imageRef = useRef(null);
-  const mirrorRef = useRef(null);
+  // const imageRef = useRef(null);
+  // const mirrorRef = useRef(null);
+  const mortRef = useRef(null);
+  const vitaRef = useRef(null);
+  const douxRef = useRef(null);
+  const tardRef = useRef(null);
+  const mortMirrorRef = useRef(null);
+  const vitaMirrorRef = useRef(null);
+  const douxMirrorRef = useRef(null);
+  const tardMirrorRef = useRef(null);
+
   const shadowRef = useRef(null);
   const usernameRef = useRef("");
   const canvasWidth = 1000;
@@ -43,24 +59,6 @@ function CanvasComponent(props) {
   const mirrorRunningFrames = [0, 1, 2, 3, 4, 5, 6];
   const mirrorIdleFrames = [19, 20, 21, 22, 23];
 
-  // let framesToPlay;
-  // if (player.username === "crazy maze") {
-  //   console.log(player.direction, player.isRunning);
-  // }
-  // const frameWidth = image.width / numFrames;
-  // if (player.isRunning) {
-  //   if (player.direction === "left") {
-  //     framesToPlay = mirrorRunningFrames;
-  //   } else {
-  //     framesToPlay = runningFrames;
-  //   }
-  // } else {
-  //   if (player.direction === "left") {
-  //     framesToPlay = mirrorIdleFrames;
-  //   } else {
-  //     framesToPlay = idleFrames;
-  //   }
-  // }
   useEffect(() => {
     socket.on("update player", (data) => {
       const {
@@ -74,25 +72,9 @@ function CanvasComponent(props) {
         roomName,
         direction,
         isRunning,
+        chosenChar,
       } = data.data;
 
-      // setPlayers((prevPlayers) => ({
-      //   ...prevPlayers,
-      //   [username]: {
-      //     username: username,
-      //     x: x,
-      //     y: y,
-      //     frameHeight: frameHeight,
-      //     frameWidth: frameWidth,
-      //     roomName: roomName,
-      //     spriteHeight: spriteHeight,
-      //     spriteWidth: spriteWidth,
-      //     spriteX: spriteX,
-      //     spriteY: spriteY,
-      //     direction: direction,
-      //     isRunning: isRunning,
-      //   },
-      // }));
       setPlayers((prevPlayers) => {
         return {
           ...prevPlayers,
@@ -109,6 +91,7 @@ function CanvasComponent(props) {
             spriteY: spriteY,
             direction: direction,
             isRunning: isRunning,
+            chosenChar: chosenChar,
           },
         };
       });
@@ -127,8 +110,14 @@ function CanvasComponent(props) {
 
   function drawSprite() {
     const ctx = ctxRef.current;
-    let image = imageRef.current;
-    let mirror = mirrorRef.current;
+    let mort = mortRef.current;
+    let vita = vitaRef.current;
+    let doux = douxRef.current;
+    let tard = tardRef.current;
+    let mortMirror = mortMirrorRef.current;
+    let vitaMirror = vitaMirrorRef.current;
+    let douxMirror = douxMirrorRef.current;
+    let tardMirror = tardMirrorRef.current;
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     const shapes = [redRect, blueRect, greenRect, orangeRect, circle];
     shapes.forEach((shape) => {
@@ -160,66 +149,108 @@ function CanvasComponent(props) {
     const textLength = (text.length / 5) * 1.5;
 
     wrapText(ctx, text, 500, textY / 2 - textLength, maxWidth, lineHeight);
-    // let framesToPlay = idleFrames;
-    // if (spriteX === prevSpriteXRef) {
-    //   setIsRunning(false);
-    // }
-    let prevSpriteX;
     for (const playerName in players) {
       const player = players[playerName];
-
-      console.log(prevSpriteX, player.spriteX);
-      if (prevSpriteX === player.spriteX) {
-        console.log("same", prevSpriteX, player.spriteX);
-      } else {
-        console.log("diff", prevSpriteX, player.spriteX);
-      }
-      prevSpriteX = player.spriteX;
-
       let framesToPlay;
-      if (player.direction === "up" || player.direction === "down") {
-        framesToPlay = idleFrames;
-      } else {
+      ctx.fillText(player.username, player.spriteX + 24, player.spriteY - 8);
+
+      if (player.direction !== "up" && player.direction !== "down") {
+        // handle left and right directions
         if (player.isRunning) {
           if (player.direction === "left") {
             framesToPlay = mirrorRunningFrames;
           } else if (player.direction === "right") {
             framesToPlay = runningFrames;
           }
-        } else if (player.isRunning === false) {
-          if (player.direction === "left") {
-            framesToPlay = mirrorIdleFrames;
-          } else {
-            framesToPlay = idleFrames;
-          }
         } else if (player.isRunning === undefined) {
           framesToPlay = mirrorRunningFrames;
         } else {
-          framesToPlay = idleFrames;
+          if (player.direction === "left") {
+            framesToPlay = mirrorIdleFrames;
+          } else if (player.direction === "right") {
+            framesToPlay = idleFrames;
+          }
         }
+      } else {
+        framesToPlay = idleFrames; // or any other default value
       }
       const numFramesToPlay = framesToPlay.length;
-      const frameWidth = image.width / numFrames;
-      const frameHeight = image.height;
       const frameIndex = framesToPlay[Math.floor(frame / numFramesToPlay)];
-      const x = frameIndex * frameWidth;
-      const y = 0;
-      const spriteX = player.spriteX;
-      const spriteY = player.spriteY;
-      // const direction = player.direction;
-      // Draw name
-      ctx.fillText(player.username, player.spriteX + 24, player.spriteY - 8);
-      // ctx.drawImage(
-      //   player.direction === "left" ? mirror : image,
-      //   x,
-      //   y,
-      //   frameWidth,
-      //   frameHeight,
-      //   spriteX,
-      //   spriteY,
-      //   spriteWidth,
-      //   spriteHeight
-      // );
+      let image;
+      let mirror;
+      let trimChar = player.chosenChar.split("/")[4].slice(0, -4);
+      if (trimChar === "mort") {
+        image = mort;
+        mirror = mortMirror;
+      } else if (trimChar === "vita") {
+        image = vita;
+        mirror = vitaMirror;
+      } else if (trimChar === "tard") {
+        image = tard;
+        mirror = tardMirror;
+      } else if (trimChar === "doux") {
+        image = doux;
+        mirror = douxMirror;
+      }
+
+      const x = frameIndex * player.frameWidth;
+      if (player.isRunning) {
+        if (player.direction === "left") {
+          ctx.drawImage(
+            mirror,
+            // player.frameWidth * runningFrames[frame % numFrames],
+            x,
+            0,
+            player.frameWidth,
+            player.frameHeight,
+            player.spriteX,
+            player.spriteY,
+            player.spriteWidth,
+            player.spriteHeight
+          );
+        } else {
+          ctx.drawImage(
+            image,
+            // player.frameWidth * runningFrames[frame % numFrames],
+            x,
+            0,
+            player.frameWidth,
+            player.frameHeight,
+            player.spriteX,
+            player.spriteY,
+            player.spriteWidth,
+            player.spriteHeight
+          );
+        }
+      } else {
+        if (player.direction === "left") {
+          ctx.drawImage(
+            mirror,
+            // player.frameWidth * idleFrames[frame % numFrames],
+            x,
+            0,
+            player.frameWidth,
+            player.frameHeight,
+            player.spriteX,
+            player.spriteY,
+            player.spriteWidth,
+            player.spriteHeight
+          );
+        } else {
+          ctx.drawImage(
+            image,
+            // player.frameWidth * idleFrames[frame % numFrames],
+            x,
+            0,
+            player.frameWidth,
+            player.frameHeight,
+            player.spriteX,
+            player.spriteY,
+            player.spriteWidth,
+            player.spriteHeight
+          );
+        }
+      }
     }
   }
 
@@ -231,8 +262,8 @@ function CanvasComponent(props) {
   }, [frame]);
 
   useEffect(() => {
-    let image = imageRef.current;
-    let mirror = mirrorRef.current;
+    let image = douxRef.current;
+    let mirror = douxMirrorRef.current;
     let shadow = shadowRef.current;
     const frameWidth = image?.width / numFrames;
     const frameHeight = image?.height;
@@ -241,6 +272,7 @@ function CanvasComponent(props) {
     const intervalId = setInterval(() => {
       setFrame((frame) => (frame + 1) % numFrames);
       socket.emit("player moved", {
+        chosenChar,
         username: username,
         direction,
         roomName,
@@ -252,8 +284,6 @@ function CanvasComponent(props) {
         x,
         y,
       });
-
-      // }, 100);
     }, refreshVar);
 
     return () => {
@@ -262,11 +292,11 @@ function CanvasComponent(props) {
   }, [frame]);
 
   function handleKeyDown(event) {
-    let image = imageRef.current;
-    let mirror = mirrorRef.current;
+    let image = douxRef.current;
+    let mirror = douxMirrorRef.current;
     let shadow = shadowRef.current;
     const frameWidth = image.width / numFrames;
-    const frameHeight = image.height;
+    const frameHeight = 24;
     const x = frame * frameWidth;
     const y = 0;
     const speed = 10;
@@ -277,6 +307,7 @@ function CanvasComponent(props) {
           setDirection("right");
           setIsRunning(true);
           socket.emit("player moved", {
+            chosenChar,
             direction,
             username,
             roomName,
@@ -298,6 +329,7 @@ function CanvasComponent(props) {
           setDirection("left");
           setIsRunning(true);
           socket.emit("player moved", {
+            chosenChar,
             direction,
             username,
             roomName,
@@ -319,6 +351,7 @@ function CanvasComponent(props) {
           setDirection("up");
           setIsRunning(true);
           socket.emit("player moved", {
+            chosenChar,
             direction,
             username,
             roomName,
@@ -340,6 +373,7 @@ function CanvasComponent(props) {
           setDirection("down");
           setIsRunning(true);
           socket.emit("player moved", {
+            chosenChar,
             direction,
             username,
             roomName,
@@ -361,25 +395,95 @@ function CanvasComponent(props) {
   }
 
   function handleImageLoad() {
-    const image = new Image();
-    const mirror = new Image();
     const shadow = new Image();
+    const mortImg = new Image();
+    const vitaImg = new Image();
+    const douxImg = new Image();
+    const tardImg = new Image();
+    mortImg.src = mort;
+    vitaImg.src = vita;
+    tardImg.src = tard;
+    douxImg.src = doux;
+    const mortImgMirror = new Image();
+    const vitaImgMirror = new Image();
+    const douxImgMirror = new Image();
+    const tardImgMirror = new Image();
+
+    mortImgMirror.src = mortMirror;
+    vitaImgMirror.src = vitaMirror;
+    tardImgMirror.src = tardMirror;
+    douxImgMirror.src = douxMirror;
+
+    mortRef.current = mortImg;
+    vitaRef.current = vitaImg;
+    tardRef.current = tardImg;
+    douxRef.current = douxImg;
+
+    mortMirrorRef.current = mortImgMirror;
+    vitaMirrorRef.current = vitaImgMirror;
+    tardMirrorRef.current = tardImgMirror;
+    douxMirrorRef.current = douxImgMirror;
+
     shadow.src = shadowBox;
-    mirror.src = tardMirror;
-    image.src = tard;
     shadowRef.current = shadow;
-    imageRef.current = image;
-    mirrorRef.current = mirror;
   }
   useEffect(() => {
     handleImageLoad();
-  }, []);
+  }, [chosenChar]);
   useEffect(() => {
     drawSprite();
   }, [frame, players]);
 
   return (
     <div className="w-full">
+      {!showColorMenu && (
+        <button
+          className="absolute z-50"
+          onClick={() => setShowColorMenu(!showColorMenu)}
+        >
+          <img src={mortStill} alt="chosen char" />
+        </button>
+      )}
+      {showColorMenu && (
+        <div className="absolute z-50">
+          <button
+            onClick={() => {
+              setChosenChar(mort);
+              setChosenCharMirror(mortMirror);
+              setShowColorMenu(!showColorMenu);
+            }}
+          >
+            <img src={mortStill} alt="mort" />
+          </button>
+          <button
+            onClick={() => {
+              setChosenChar(tard);
+              setChosenCharMirror(tardMirror);
+              setShowColorMenu(!showColorMenu);
+            }}
+          >
+            <img src={tardStill} alt="tard" />
+          </button>
+          <button
+            onClick={() => {
+              setChosenChar(doux);
+              setChosenCharMirror(douxMirror);
+              setShowColorMenu(!showColorMenu);
+            }}
+          >
+            <img src={douxStill} alt="doux" />
+          </button>
+          <button
+            onClick={() => {
+              setChosenChar(vita);
+              setChosenCharMirror(vitaMirror);
+              setShowColorMenu(!showColorMenu);
+            }}
+          >
+            <img src={vitaStill} alt="vita" />
+          </button>
+        </div>
+      )}
       <div className="relative justify-center flex flex-center items-center">
         <canvas
           className="bg-neutral-900  border-white border-2 rounded"
