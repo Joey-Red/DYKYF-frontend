@@ -20,10 +20,16 @@ import {
   greenRect,
   orangeRect,
   circle,
+  redSmallRect,
+  blueSmallRect,
+  greenSmallRect,
+  orangeSmallRect,
+  smallCircle,
 } from "./canvasVariables";
+import DisplayQA from "./DisplayQA";
 
 function CanvasComponent(props) {
-  let { roomName, username, isHost, socket, io } = props;
+  let { roomName, username, isHost, socket, io, socketId, QAArray } = props;
   let [chosenChar, setChosenChar] = useState(tard);
   let [chosenCharMirror, setChosenCharMirror] = useState(tardMirror);
   const [players, setPlayers] = useState({});
@@ -34,6 +40,7 @@ function CanvasComponent(props) {
   const [isRunning, setIsRunning] = useState(false);
   const [refreshVar, setRefreshVar] = useState(20);
   let [showColorMenu, setShowColorMenu] = useState(false);
+  const [size, setSize] = useState("small");
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
   // const imageRef = useRef(null);
@@ -49,19 +56,22 @@ function CanvasComponent(props) {
 
   const shadowRef = useRef(null);
   const usernameRef = useRef("");
-  const canvasWidth = 1000;
+  // let canvasWidth = 1000;
+  // let canvasHeight = 1000;
   const numFrames = 24;
-  const canvasHeight = 1000;
+  let canvasWidth = 900;
+  let canvasHeight = 900;
+
   const spriteWidth = 48;
   const spriteHeight = 40;
   const idleFrames = [0, 1, 2, 3, 4];
   const runningFrames = [17, 18, 19, 20, 21, 22, 23];
   const mirrorRunningFrames = [0, 1, 2, 3, 4, 5, 6];
   const mirrorIdleFrames = [19, 20, 21, 22, 23];
-
   useEffect(() => {
     socket.on("update player", (data) => {
       const {
+        socketId,
         username,
         x,
         y,
@@ -87,6 +97,7 @@ function CanvasComponent(props) {
             roomName: roomName,
             spriteHeight: spriteHeight,
             spriteWidth: spriteWidth,
+            socketId: socketId,
             spriteX: spriteX,
             spriteY: spriteY,
             direction: direction,
@@ -96,9 +107,22 @@ function CanvasComponent(props) {
         };
       });
     });
-    socket.on("disconnect", () => {
-      console.log("disconnected from server");
+
+    socket.on("players", (data) => {
+      setPlayers((prevPlayers) => {
+        const newPlayers = { ...prevPlayers };
+        // loop through the previous players
+        for (const id in newPlayers) {
+          // check if the id is not in the new data
+          if (!(id in data)) {
+            // remove the player from the new players object
+            delete newPlayers[id];
+          }
+        }
+        return newPlayers;
+      });
     });
+    socket.on("disconnect", () => {});
   }, []);
 
   useEffect(() => {
@@ -106,8 +130,24 @@ function CanvasComponent(props) {
     const ctx = canvas.getContext("2d");
     ctxRef.current = ctx;
     usernameRef.current = username;
-  }, []);
+    if (window.innerWidth < 899) {
+      canvas.height = 300;
+      canvas.width = 300;
+      setSize("small");
+      canvasHeight = 300;
+      canvasWidth = 300;
+    } else {
+      canvas.height = 900;
+      canvas.width = 900;
+      setSize("large");
+      canvasHeight = 900;
+      canvasWidth = 900;
+    }
+  }, [size]);
 
+  function playGame(QA) {
+    console.log(QA);
+  }
   function drawSprite() {
     const ctx = ctxRef.current;
     let mort = mortRef.current;
@@ -119,11 +159,25 @@ function CanvasComponent(props) {
     let douxMirror = douxMirrorRef.current;
     let tardMirror = tardMirrorRef.current;
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    let shapeSizes;
     const shapes = [redRect, blueRect, greenRect, orangeRect, circle];
-    shapes.forEach((shape) => {
+    const smallShapes = [
+      redSmallRect,
+      blueSmallRect,
+      greenSmallRect,
+      orangeSmallRect,
+      smallCircle,
+    ];
+    if (size === "small") {
+      shapeSizes = smallShapes;
+    } else {
+      shapeSizes = shapes;
+    }
+    shapeSizes.forEach((shape) => {
       ctx.lineWidth = lineWidth;
       ctx.beginPath();
-      if (shape.hasOwnProperty("radius") && shape.radius > 100) {
+      // if (shape.hasOwnProperty("radius") && shape.radius > 100) {
+      if (shape.hasOwnProperty("radius") && shape.radius > 60) {
         ctx.arc(shape.x, shape.y, shape.radius, 0, 2 * Math.PI);
       } else {
         ctx.roundRect(
@@ -138,21 +192,42 @@ function CanvasComponent(props) {
       ctx.fillStyle = shape.color;
       ctx.fill();
     });
-    const maxWidth = 400;
-    const lineHeight = 24;
+    let maxWidth = 400;
+    let midPoint = 450;
+    const lineHeight = 28;
     const textY = canvasHeight;
-    const text = "What is your favorite childhood memory?";
-    ctx.font = "20px Permanent Marker";
+    const text = "DO YOU KNOW YOUR FRIENDS?";
+    ctx.font = "30px LemonMilk";
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     const textLength = (text.length / 5) * 1.5;
-
-    wrapText(ctx, text, 500, textY / 2 - textLength, maxWidth, lineHeight);
+    if (size === "small") {
+      ctx.fillText("DYKYF?", 150, 150);
+    } else {
+      wrapText(
+        ctx,
+        text,
+        midPoint,
+        textY / 2 - textLength,
+        maxWidth,
+        lineHeight
+      );
+    }
     for (const playerName in players) {
       const player = players[playerName];
       let framesToPlay;
-      ctx.fillText(player.username, player.spriteX + 24, player.spriteY - 8);
+      if (size === "small") {
+        ctx.font = "15px LemonMilk";
+        ctx.fillText(
+          player.username,
+          (player.spriteX + 24) / 3,
+          (player.spriteY - 8) / 3.3
+        );
+      } else {
+        ctx.font = "20px LemonMilk";
+        ctx.fillText(player.username, player.spriteX + 24, player.spriteY - 8);
+      }
 
       if (player.direction !== "up" && player.direction !== "down") {
         // handle left and right directions
@@ -194,61 +269,121 @@ function CanvasComponent(props) {
       }
 
       const x = frameIndex * player.frameWidth;
-      if (player.isRunning) {
-        if (player.direction === "left") {
-          ctx.drawImage(
-            mirror,
-            // player.frameWidth * runningFrames[frame % numFrames],
-            x,
-            0,
-            player.frameWidth,
-            player.frameHeight,
-            player.spriteX,
-            player.spriteY,
-            player.spriteWidth,
-            player.spriteHeight
-          );
+      if (size === "small") {
+        if (player.isRunning) {
+          if (player.direction === "left") {
+            ctx.drawImage(
+              mirror,
+              // player.frameWidth * runningFrames[frame % numFrames],
+              x,
+              0,
+              player.frameWidth,
+              player.frameHeight,
+              player.spriteX / 3.3,
+              player.spriteY / 3.3,
+              player.spriteWidth,
+              player.spriteHeight
+            );
+          } else {
+            ctx.drawImage(
+              image,
+              // player.frameWidth * runningFrames[frame % numFrames],
+              x,
+              0,
+              player.frameWidth,
+              player.frameHeight,
+              player.spriteX / 3.3,
+              player.spriteY / 3.3,
+              player.spriteWidth,
+              player.spriteHeight
+            );
+          }
         } else {
-          ctx.drawImage(
-            image,
-            // player.frameWidth * runningFrames[frame % numFrames],
-            x,
-            0,
-            player.frameWidth,
-            player.frameHeight,
-            player.spriteX,
-            player.spriteY,
-            player.spriteWidth,
-            player.spriteHeight
-          );
+          if (player.direction === "left") {
+            ctx.drawImage(
+              mirror,
+              // player.frameWidth * idleFrames[frame % numFrames],
+              x,
+              0,
+              player.frameWidth,
+              player.frameHeight,
+              player.spriteX / 3.3,
+              player.spriteY / 3.3,
+              player.spriteWidth,
+              player.spriteHeight
+            );
+          } else {
+            ctx.drawImage(
+              image,
+              // player.frameWidth * idleFrames[frame % numFrames],
+              x,
+              0,
+              player.frameWidth,
+              player.frameHeight,
+              player.spriteX / 3.3,
+              player.spriteY / 3.3,
+              player.spriteWidth,
+              player.spriteHeight
+            );
+          }
         }
       } else {
-        if (player.direction === "left") {
-          ctx.drawImage(
-            mirror,
-            // player.frameWidth * idleFrames[frame % numFrames],
-            x,
-            0,
-            player.frameWidth,
-            player.frameHeight,
-            player.spriteX,
-            player.spriteY,
-            player.spriteWidth,
-            player.spriteHeight
-          );
+        if (player.isRunning) {
+          if (player.direction === "left") {
+            ctx.drawImage(
+              mirror,
+              // player.frameWidth * runningFrames[frame % numFrames],
+              x,
+              0,
+              player.frameWidth,
+              player.frameHeight,
+              player.spriteX,
+              player.spriteY,
+              player.spriteWidth,
+              player.spriteHeight
+            );
+          } else {
+            ctx.drawImage(
+              image,
+              // player.frameWidth * runningFrames[frame % numFrames],
+              x,
+              0,
+              player.frameWidth,
+              player.frameHeight,
+              player.spriteX,
+              player.spriteY,
+              player.spriteWidth,
+              player.spriteHeight
+            );
+          }
         } else {
-          ctx.drawImage(
-            image,
-            // player.frameWidth * idleFrames[frame % numFrames],
-            x,
-            0,
-            player.frameWidth,
-            player.frameHeight,
-            player.spriteX,
-            player.spriteY,
-            player.spriteWidth,
-            player.spriteHeight
-          );
+          if (player.direction === "left") {
+            ctx.drawImage(
+              mirror,
+              // player.frameWidth * idleFrames[frame % numFrames],
+              x,
+              0,
+              player.frameWidth,
+              player.frameHeight,
+              player.spriteX,
+              player.spriteY,
+              player.spriteWidth,
+              player.spriteHeight
+            );
+          } else {
+            ctx.drawImage(
+              image,
+              // player.frameWidth * idleFrames[frame % numFrames],
+              x,
+              0,
+              player.frameWidth,
+              player.frameHeight,
+              player.spriteX,
+              player.spriteY,
+              player.spriteWidth,
+              player.spriteHeight
+            );
+          }
         }
       }
     }
@@ -429,23 +564,24 @@ function CanvasComponent(props) {
   }
   useEffect(() => {
     handleImageLoad();
+    playGame(QAArray);
   }, [chosenChar]);
   useEffect(() => {
     drawSprite();
   }, [frame, players]);
 
   return (
-    <div className="w-full">
+    <div className="w-full max-h-screen">
       {!showColorMenu && (
         <button
-          className="absolute z-50"
+          className="absolute z-50 top-0 right-0 left-0 "
           onClick={() => setShowColorMenu(!showColorMenu)}
         >
           <img src={mortStill} alt="chosen char" />
         </button>
       )}
       {showColorMenu && (
-        <div className="absolute z-50">
+        <div className="absolute z-50 top-0 right-0 left-0 bottom-0 ">
           <button
             onClick={() => {
               setChosenChar(mort);
@@ -484,7 +620,8 @@ function CanvasComponent(props) {
           </button>
         </div>
       )}
-      <div className="relative justify-center flex flex-center items-center">
+      <DisplayQA QAArray={QAArray} />
+      <div className="absolute top-0 right-0 left-0 bottom-0 justify-center flex flex-center items-center">
         <canvas
           className="bg-neutral-900  border-white border-2 rounded"
           ref={canvasRef}

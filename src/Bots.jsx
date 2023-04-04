@@ -3,19 +3,32 @@ import doux from "./assets/sheets/doux.png";
 import tard from "./assets/sheets/tard.png";
 import mort from "./assets/sheets/mort.png";
 import vita from "./assets/sheets/vita.png";
-import douxMirror from "./assets/sheets/douxMirror.png";
 import tardMirror from "./assets/sheets/tardMirror.png";
-import mortMirror from "./assets/sheets/mortMirror.png";
-import vitaMirror from "./assets/sheets/vitaMirror.png";
 import shadowBox from "./assets/misc/shadow_2.png";
-function Bots() {
+import { wrapText } from "./canvasTextWrapper";
+import {
+  lineWidth,
+  redRect,
+  blueRect,
+  greenRect,
+  orangeRect,
+  circle,
+  redSmallRect,
+  blueSmallRect,
+  greenSmallRect,
+  orangeSmallRect,
+  smallCircle,
+} from "./canvasVariables";
+function Bots(props) {
+  let { username } = props;
   const [frame, setFrame] = useState(0);
-  const [spriteX, setSpriteX] = useState(250);
-  const [spriteY, setSpriteY] = useState(250);
-  const [botOneCords, setBotOneCords] = useState({ x: 250, y: 250 });
-  const [botTwoCords, setBotTwoCords] = useState({ x: 250, y: 250 });
-  const [botThreeCords, setBotThreeCords] = useState({ x: 250, y: 250 });
+  const [spriteX, setSpriteX] = useState(300);
+  const [spriteY, setSpriteY] = useState(300);
+  const [botOneCords, setBotOneCords] = useState({ x: 300, y: 300 });
+  const [botTwoCords, setBotTwoCords] = useState({ x: 300, y: 300 });
+  const [botThreeCords, setBotThreeCords] = useState({ x: 300, y: 300 });
   const [direction, setDirection] = useState("right");
+  const [size, setSize] = useState("small");
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
   const imageRef = useRef(null);
@@ -27,8 +40,8 @@ function Bots() {
   // const moveBotsIntervalRef = useRef(null);
 
   const numFrames = 24;
-  const canvasWidth = 500;
-  const canvasHeight = 500;
+  let canvasWidth = 900;
+  let canvasHeight = 900;
   const spriteWidth = 48;
   const spriteHeight = 40;
 
@@ -36,6 +49,24 @@ function Bots() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     ctxRef.current = ctx;
+    if (window.innerWidth < 899) {
+      canvasHeight = 300;
+      canvasWidth = 300;
+      canvas.height = 300;
+      canvas.width = 300;
+      setSize("small");
+      setBotOneCords({ x: 150, y: 150 });
+      setSpriteX(150);
+      setSpriteY(150);
+      setBotTwoCords({ x: 150, y: 150 });
+      setBotThreeCords({ x: 150, y: 150 });
+    } else {
+      canvas.height = 900;
+      canvas.width = 900;
+      canvasHeight = 900;
+      canvasWidth = 900;
+      setSize("large");
+    }
   }, []);
 
   function drawSprite(direction) {
@@ -54,66 +85,54 @@ function Bots() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
     ctx.lineWidth = 10;
-    ctx.beginPath();
-    ctx.roundRect(25, 25, 200, 200, 12);
-    ctx.stroke();
-    ctx.fillStyle = "red";
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.roundRect(275, 25, 200, 200, 12);
-    ctx.stroke();
-    ctx.fillStyle = "blue";
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.roundRect(25, 275, 200, 200, 12);
-    ctx.stroke();
-    ctx.fillStyle = "green";
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.roundRect(275, 275, 200, 200, 12);
-    ctx.stroke();
-    ctx.fillStyle = "orange";
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(250, 250, 120, 0, 2 * Math.PI);
-    ctx.fillStyle = "#171717";
-    ctx.stroke();
-    ctx.fill();
-
-    function wrapText(ctx, text, x, textY, maxWidth, lineHeight) {
-      var words = text.split(" ");
-      var line = "";
-      for (var n = 0; n < words.length; n++) {
-        var testLine = line + words[n] + " ";
-        var metrics = ctx.measureText(testLine);
-        var testWidth = metrics.width;
-        if (testWidth > maxWidth && n > 0) {
-          ctx.fillText(line, x, textY);
-          line = words[n] + " ";
-          textY += lineHeight;
-        } else {
-          line = testLine;
-        }
-      }
-      ctx.fillText(line, x, textY);
+    let shapeSizes;
+    const shapes = [redRect, blueRect, greenRect, orangeRect, circle];
+    const smallShapes = [
+      redSmallRect,
+      blueSmallRect,
+      greenSmallRect,
+      orangeSmallRect,
+      smallCircle,
+    ];
+    if (size === "small") {
+      shapeSizes = smallShapes;
+    } else {
+      shapeSizes = shapes;
     }
-    var maxWidth = 200;
-    var lineHeight = 24;
-    var textY = canvasHeight;
-    var text = `Do you know your friends?`;
-    ctx.font = "20px Permanent Marker";
+    shapeSizes.forEach((shape) => {
+      ctx.lineWidth = lineWidth;
+      ctx.beginPath();
+      // if (shape.hasOwnProperty("radius") && shape.radius > 100) {
+      if (shape.hasOwnProperty("radius") && shape.radius > 60) {
+        ctx.arc(shape.x, shape.y, shape.radius, 0, 2 * Math.PI);
+      } else {
+        ctx.roundRect(
+          shape.x,
+          shape.y,
+          shape.width,
+          shape.height,
+          shape.radius
+        );
+      }
+      ctx.stroke();
+      ctx.fillStyle = shape.color;
+      ctx.fill();
+    });
+    let maxWidth = 400;
+    let midPoint = 450;
+    const lineHeight = 28;
+    const textY = canvasHeight;
+    const text = "DO YOU KNOW YOUR FRIENDS?";
+    ctx.font = "30px LemonMilk";
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    var textLength = (text.length / 5) * 1.5;
-    // 1 line = 5 words
-    // 11px per line
-    // every 5 words add 1 rem height
-    wrapText(ctx, text, 250, textY / 2 - textLength, maxWidth, lineHeight);
+    const textLength = (text.length / 5) * 1.5;
+    if (size === "small") {
+      ctx.fillText("DYKYF?", 150, 150);
+    } else {
+      wrapText(ctx, text, midPoint, 450, maxWidth, lineHeight);
+    }
     ctx.drawImage(shadow, spriteX, spriteY, spriteWidth, spriteHeight);
     // Draw Bots
     ctx.drawImage(
@@ -149,6 +168,8 @@ function Bots() {
       spriteWidth,
       spriteHeight
     );
+    ctx.font = "20px LemonMilk";
+    ctx.fillText(username, spriteX + 24, spriteY - 8);
     if (direction === "right") {
       ctx.drawImage(
         image,
@@ -266,6 +287,16 @@ function Bots() {
   }, []);
   function handleKeyDown(event) {
     // setFrame((frame) => frame + 1);
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    ctxRef.current = ctx;
+    if (window.innerWidth < 899) {
+      canvasHeight = 300;
+      canvasWidth = 300;
+    } else {
+      canvasHeight = 900;
+      canvasWidth = 900;
+    }
     const speed = 15;
     switch (event.code) {
       case "ArrowRight":

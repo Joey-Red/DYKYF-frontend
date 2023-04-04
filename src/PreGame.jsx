@@ -36,6 +36,7 @@ function PreGame(props) {
     username,
     roomSize,
     setRoomSize,
+    setQAArray,
   } = props;
   useEffect(() => {
     axios
@@ -57,7 +58,6 @@ function PreGame(props) {
     socket.on("disconnect", () => {
       console.log("disconnected from server");
     });
-
     socket.on("playersWhoSubmittedAnswers", (data) => {
       console.log(data);
     });
@@ -66,6 +66,7 @@ function PreGame(props) {
     });
     socket.on("allPlayersReady", (data) => {
       setAllPlayersReady(true);
+      setQAArray(data);
     });
     socket.on("start game", (data) => {
       setRoomSize(data.roomSize);
@@ -77,12 +78,12 @@ function PreGame(props) {
     socket.emit("submitAnswers", {
       roomName: roomName,
       socketId: socket.id,
-      // username: customUsername,
+      username: username,
       questionOne: questions[0],
       answerOne: answerOne,
       questionTwo: questions[1],
       answerTwo: answerTwo,
-      questionsThree: questions[2],
+      questionThree: questions[2],
       answerThree: answerThree,
     });
     setAnswersSubmitted(true);
@@ -119,7 +120,13 @@ function PreGame(props) {
   };
   return (
     <div>
-      <img src={bannerTransparent} className="h-[200px] flex mx-auto" alt="" />
+      {answersSubmitted && (
+        <img
+          src={bannerTransparent}
+          className="h-[200px] flex mx-auto"
+          alt=""
+        />
+      )}
       {!loaded && (
         <div className="flex justify-evenly gap-4 w-full">
           <div className="flex flex-col">
@@ -128,7 +135,7 @@ function PreGame(props) {
               <li>a) Loading..</li>
               <li>b) Loading.. </li>
               <li>c) Loading..</li>
-              <li> d) Loading..</li>
+              <li>d) Loading..</li>
             </ul>
           </div>
           <div className="flex flex-col">
@@ -137,7 +144,7 @@ function PreGame(props) {
               <li>a) Loading..</li>
               <li>b) Loading.. </li>
               <li>c) Loading..</li>
-              <li> d) Loading..</li>
+              <li>d) Loading..</li>
             </ul>
           </div>
           <div className="flex flex-col">
@@ -146,7 +153,7 @@ function PreGame(props) {
               <li>a) Loading..</li>
               <li>b) Loading.. </li>
               <li>c) Loading..</li>
-              <li> d) Loading..</li>
+              <li>d) Loading..</li>
             </ul>
           </div>
         </div>
@@ -353,21 +360,10 @@ function PreGame(props) {
               </ul>
             </div>
           </div>
-          {/* <label className="mt-2" htmlFor="username">
-            Enter Username
-          </label>
-          <input
-            type="text"
-            placeholder="Username"
-            className="rounded w-full my-2 text-black"
-            onChange={(e) => {
-              setCustomUsername(e.target.value);
-            }}
-          /> */}
           <button
             // disabled={buttonDisabled}
             // onClick={() => doneAnswering()}
-            onClick={doneAnswering()}
+            onClick={() => doneAnswering()}
             className="mt-4 p-2 mx-auto w-full rounded bg-[#FF0000] font-bold border-black border-4 text-black text-2xl"
           >
             I'm done.
@@ -375,19 +371,19 @@ function PreGame(props) {
         </div>
       )}
       {answersSubmitted && !isHost && !allPlayersReady && (
-        <div className="text-style flex items-center justify-center">
+        <div className="pt-4 text-style flex items-center justify-center">
           <LoadingSpinner />
           Waiting for other players.
         </div>
       )}
       {answersSubmitted && isHost && !allPlayersReady && (
-        <div className="text-style flex items-center justify-center">
+        <div className="pt-4 text-style flex items-center justify-center">
           <LoadingSpinner />
           Waiting for other players.
         </div>
       )}
       {allPlayersReady && (
-        <div className="text-style flex items-center justify-center">
+        <div className="pt-4 text-style flex items-center justify-center">
           All Players ready, waiting for host to start.
         </div>
       )}

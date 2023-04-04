@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CanvasComponent from "./CanvasComponent";
-import PreGame from "./PreGame";
 import JoinOrHost from "./JoinOrHost";
-import Bots from "./Bots";
 import io from "socket.io-client";
 const socket = io("http://localhost:3001");
 import bannerTransparent from "./assets/misc/BannerTransparent.png";
@@ -15,19 +13,17 @@ function App() {
   let [username, setUsername] = useState("");
   let [roomName, setRoomName] = useState("");
   let [roomSize, setRoomSize] = useState();
+  let [QAArray, setQAArray] = useState([]);
   const words = useRandomWord();
 
   useEffect(() => {
     setUsername(words);
   }, []);
-  // useEffect(() => {
-  //   console.log(words);
-  // }, []);
 
   return (
     <RoomProvider>
-      <div className="h-screen overflow-hidden bg-neutral-900 text-white">
-        <div className="items-center justify-center flex flex-col">
+      <div className="min-h-screen bg-neutral-900 text-white">
+        <div className="h-full items-center justify-center flex flex-col">
           <JoinOrHost
             foundRoom={foundRoom}
             setFoundRoom={setFoundRoom}
@@ -42,22 +38,26 @@ function App() {
             io={io}
             setRoomSize={setRoomSize}
             roomSize={roomSize}
+            socketId={socket.id}
+            setQAArray={setQAArray}
           />
         </div>
         {foundRoom && questionsAnswered && (
           <div className="w-full flex flex-col justify-center items-center">
-            <img
+            {/* <img
               className="flex mx-auto h-[350px]"
               src={bannerTransparent}
               alt=""
-            />
+            /> */}
             <CanvasComponent
+              socketId={socket.id}
               username={username}
               isHost={isHost}
               socket={socket}
               io={io}
               roomName={roomName}
               roomSize={roomSize}
+              QAArray={QAArray}
             />
           </div>
         )}

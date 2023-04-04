@@ -23,6 +23,8 @@ function JoinOrHost(props) {
     setRoomName,
     setRoomSize,
     roomSize,
+    socketId,
+    setQAArray,
   } = props;
   useEffect(() => {
     socket.on("connect", () => {
@@ -88,7 +90,7 @@ function JoinOrHost(props) {
       <div className="flex flex-col items-center">
         {!foundRoom && (
           <img
-            className="flex mx-auto max-h-[350px]"
+            className="flex mx-auto max-h-[20vh] p-4 md:flex"
             src={bannerTransparent}
             alt=""
           />
@@ -96,7 +98,7 @@ function JoinOrHost(props) {
         {foundRoom && questionsAnswered ? (
           <></>
         ) : (
-          <div className="flex flex-col border-2 border-white p-4 rounded m-4 w-[500px]">
+          <div className="flex flex-col p-2 my-4">
             {foundRoom === true && questionsAnswered === false ? (
               <div className="w-full flex flex-col justify-center items-center">
                 <PreGame
@@ -108,6 +110,8 @@ function JoinOrHost(props) {
                   username={username}
                   setRoomSize={setRoomSize}
                   roomSize={roomSize}
+                  socketId={socketId}
+                  setQAArray={setQAArray}
                 />
               </div>
             ) : (
@@ -145,7 +149,7 @@ function JoinOrHost(props) {
                       )}
                       <input
                         className="rounded text-black"
-                        placeholder="Hurry up and send the code dude"
+                        placeholder="Hurry up and send it"
                         type="text"
                         // value={roomName}
                         onChange={(event) => setRoomName(event.target.value)}
@@ -164,7 +168,11 @@ function JoinOrHost(props) {
           </div>
         )}
       </div>
-      {foundRoom === false || questionsAnswered === false ? <Bots /> : <></>}
+      {foundRoom === false || questionsAnswered === false ? (
+        <Bots username={username} />
+      ) : (
+        <></>
+      )}
     </div>
   );
 }

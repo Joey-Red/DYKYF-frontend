@@ -4,22 +4,13 @@
 .text-style {
   font-family: "Permanent Marker", cursive;
 }
-/* width */
-::-webkit-scrollbar {
-  width: 14px;
-  border: solid black 4px;
+@font-face {
+  font-family: "LemonMilk";
+  src: url("./assets/font/LEMONMILK-Regular.otf") format("opentype"),
+    url("./assets/font/LEMONMILK-Medium.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
 }
-
-/* Track */
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border: solid black 4px;
-  border-radius: 9999px;
-}
-
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: #ff0101;
-  border: solid black 4px;
-  border-radius: 9999px;
+body {
+  font-family: "LemonMilk", sans-serif;
 }
