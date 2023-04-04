@@ -1,37 +1,101 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 function DisplayQAList(props) {
-  const { QAArray } = props;
+  const { QAArray, isHost } = props;
+  const [questionArray, setQuestionArray] = useState([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [gameOver, setGameOver] = useState(false);
+
+  useState(() => {
+    const newQuestionArray = QAArray.playerAnswersArray.map(
+      ({ username, answers }) => {
+        const { questionOne, questionTwo, questionThree } = answers;
+        return {
+          username,
+          questions: [
+            {
+              question: questionOne.question,
+              answerA: questionOne.a,
+              answerB: questionOne.b,
+              answerC: questionOne.c,
+              correctAnswer: answers.answerOne,
+            },
+            {
+              question: questionTwo.question,
+              answerA: questionTwo.a,
+              answerB: questionTwo.b,
+              answerC: questionTwo.c,
+              correctAnswer: answers.answerTwo,
+            },
+            {
+              question: questionThree.question,
+              answerA: questionThree.a,
+              answerB: questionThree.b,
+              answerC: questionThree.c,
+              correctAnswer: answers.answerThree,
+            },
+          ],
+        };
+      }
+    );
+    setQuestionArray(newQuestionArray);
+    setLoading(false);
+  }, []);
+
+  const handleNextQuestion = () => {
+    const nextIndex = currentQuestionIndex + 1;
+    if (nextIndex >= questionArray.length) {
+      setGameOver(true);
+    } else {
+      setCurrentQuestionIndex(nextIndex % questionArray.length);
+    }
+  };
+
   return (
     <div>
-      {QAArray.playerAnswersArray.map((item) => (
-        <div key={item.username}>
-          <h2>{item.username}</h2>
-          <ul>
-            <div className="flex flex-col">
-              <strong>{item.answers.questionOne.question}:</strong>{" "}
-              <li>CORRECT: {item.answers.answerOne}</li>
-              <li>a) {item.answers.questionOne.a}</li>
-              <li>b) {item.answers.questionOne.b}</li>
-              <li>c) {item.answers.questionOne.c}</li>
-            </div>
-            <div className="flex flex-col">
-              <strong>{item.answers.questionTwo.question}:</strong>{" "}
-              <li>CORRECT: {item.answers.answerTwo}</li>
-              <li>a) {item.answers.questionTwo.a}</li>
-              <li>b) {item.answers.questionTwo.b}</li>
-              <li>c) {item.answers.questionTwo.c}</li>
-            </div>
-            <div className="flex flex-col">
-              <strong>{item.answers.questionThree.question}:</strong>{" "}
-              <li>CORRECT: {item.answers.answerThree}</li>
-              <li>a) {item.answers.questionThree.a}</li>
-              <li>b) {item.answers.questionThree.b}</li>
-              <li>c) {item.answers.questionThree.c}</li>
-            </div>
-          </ul>
+      {!loading && !gameOver && (
+        <div className="flex flex-col gap-2 text-center">
+          <h3>
+            {questionArray[Math.floor(currentQuestionIndex / 3)].username}
+          </h3>
+          <h3>
+            {
+              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                currentQuestionIndex % 3
+              ].question
+            }
+          </h3>
+          <p className="bg-[red] border-4 border-black rounded">
+            {
+              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                currentQuestionIndex % 3
+              ].answerA
+            }
+          </p>
+          <p className="bg-[blue] border-4 border-black rounded">
+            {
+              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                currentQuestionIndex % 3
+              ].answerB
+            }
+          </p>
+          <p className="bg-[green] border-4 border-black rounded">
+            {
+              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                currentQuestionIndex % 3
+              ].answerC
+            }
+          </p>
+          {isHost && (
+            <>
+              <button onClick={handleNextQuestion}>Next Question</button>
+            </>
+          )}
+          {!isHost && <div className="h-1"></div>}
         </div>
-      ))}
+      )}
+      {gameOver && <>Game Over!</>}
     </div>
   );
 }

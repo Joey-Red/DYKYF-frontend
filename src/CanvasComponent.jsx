@@ -146,7 +146,7 @@ function CanvasComponent(props) {
   }, [size]);
 
   function playGame(QA) {
-    console.log(QA);
+    // console.log(QA);
   }
   function drawSprite() {
     const ctx = ctxRef.current;
@@ -574,14 +574,14 @@ function CanvasComponent(props) {
     <div className="w-full max-h-screen">
       {!showColorMenu && (
         <button
-          className="absolute z-50 top-0 right-0 left-0 "
+          className="absolute z-50 top-0 left-0 "
           onClick={() => setShowColorMenu(!showColorMenu)}
         >
           <img src={mortStill} alt="chosen char" />
         </button>
       )}
       {showColorMenu && (
-        <div className="absolute z-50 top-0 right-0 left-0 bottom-0 ">
+        <div className="absolute z-50 top-0 left-0 bottom-0 ">
           <button
             onClick={() => {
               setChosenChar(mort);
@@ -620,8 +620,8 @@ function CanvasComponent(props) {
           </button>
         </div>
       )}
-      <DisplayQA QAArray={QAArray} />
-      <div className="absolute top-0 right-0 left-0 bottom-0 justify-center flex flex-center items-center">
+      <div className="absolute flex-col top-0 right-0 left-0 bottom-0 justify-center flex flex-center items-center">
+        <DisplayQA QAArray={QAArray} isHost={isHost} />
         <canvas
           className="bg-neutral-900  border-white border-2 rounded"
           ref={canvasRef}
