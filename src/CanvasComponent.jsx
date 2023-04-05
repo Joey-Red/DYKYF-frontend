@@ -41,6 +41,7 @@ function CanvasComponent(props) {
   const [refreshVar, setRefreshVar] = useState(20);
   let [showColorMenu, setShowColorMenu] = useState(false);
   const [size, setSize] = useState("small");
+  const [updatedPlayers, setUpdatedPlayers] = useState(null);
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
   // const imageRef = useRef(null);
@@ -148,6 +149,7 @@ function CanvasComponent(props) {
   function playGame(QA) {
     // console.log(QA);
   }
+
   function drawSprite() {
     const ctx = ctxRef.current;
     let mort = mortRef.current;
@@ -621,7 +623,15 @@ function CanvasComponent(props) {
         </div>
       )}
       <div className="absolute flex-col top-0 right-0 left-0 bottom-0 justify-center flex flex-center items-center">
-        <DisplayQA QAArray={QAArray} isHost={isHost} />
+        <DisplayQA
+          QAArray={QAArray}
+          isHost={isHost}
+          socket={socket}
+          io={io}
+          roomName={roomName}
+          players={players}
+          updatedPlayers={updatedPlayers}
+        />
         <canvas
           className="bg-neutral-900  border-white border-2 rounded"
           ref={canvasRef}

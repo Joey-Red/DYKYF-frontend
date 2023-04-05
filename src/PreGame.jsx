@@ -7,9 +7,9 @@ import ChatRoom from "./ChatRoom";
 function PreGame(props) {
   let [questions, setQuestions] = useState([]);
   let [loaded, setLoaded] = useState(false);
-  let [answerOne, setAnswerOne] = useState("");
-  let [answerTwo, setAnswerTwo] = useState("");
-  let [answerThree, setAnswerThree] = useState("");
+  let [answerOne, setAnswerOne] = useState("APPLE");
+  let [answerTwo, setAnswerTwo] = useState("BAN");
+  let [answerThree, setAnswerThree] = useState("ORA");
   let [answersSubmitted, setAnswersSubmitted] = useState(false);
   let [buttonDisabled, setButtonDisabled] = useState(true);
   let [clickedOneA, setClickedOneA] = useState(false);
