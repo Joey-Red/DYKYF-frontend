@@ -23,23 +23,71 @@ function DisplayQAList(props) {
   const [scoreboard, setScoreboard] = useState();
   const [scores, setScores] = useState({});
   const [showScoreboard, setShowScoreboard] = useState(false);
+  const [shouldRun, setShouldRun] = useState(false);
+  const [checkIndex, setCheckIndex] = useState(0);
+  const [message, setMessage] = useState("");
+  const [hideMessage, setHideMessage] = useState(true);
+  // const [showCelebration, setShowCelebration] = useState(false);
+  // const [celebrateName, setCelebrateName] = useState();
 
   useEffect(() => {
     let timer;
     timer = setTimeout(() => {
       setButtonHidden(false);
-    }, 9000);
+      // }, 9000);
+    }, 0);
   }, []);
+  useEffect(() => {
+    let timer;
+    timer = setTimeout(() => {
+      setHideMessage(true);
+    }, 2000);
+  }, [message]);
   // let floatingAnswer;
+
   useEffect(() => {
     socket.on("game over", (data) => {
-      setGameOver(true);
+      // setGameOver(true);
+      setShowCorrectAnswer(true);
+      // checkPlayers();
+      setCheckIndex((prevIndex) => {
+        return (prevIndex + 1) % (questionArray.length * 3);
+      });
+      setTimeout(() => {
+        setShowCorrectAnswer(false);
+        setGameOver(true);
+        // Check to see who won
+        // Get the array of values from the object
+        const values = Object.values(scores);
+
+        // Find the maximum value in the array
+        const max = Math.max(...values);
+
+        // Find the indices of the maximum values in the array
+        const indices = values.reduce((acc, val, i) => {
+          if (val === max) {
+            acc.push(i);
+          }
+          return acc;
+        }, []);
+
+        // Get the usernames corresponding to the maximum values
+        const winners = indices.map((index) => Object.keys(scores)[index]);
+
+        // Check if there is a tie
+        if (winners.length === 1) {
+          console.log(`The winner is ${winners[0]}`);
+        } else {
+          console.log(`There is a tie between ${winners.join(" and ")}`);
+        }
+      }, 3000);
     });
     socket.on("next question", (data) => {
-      // console.log(floatVar);
-      // console.log(checkCords(players));
-      // console.log(data.correctAnswerColor);
       setShowCorrectAnswer(true);
+      // checkPlayers();
+      setCheckIndex((prevIndex) => {
+        return (prevIndex + 1) % (questionArray.length * 3);
+      });
       setTimeout(() => {
         setShowCorrectAnswer(false);
         setCorrectAnswerColor(data.corrAnswerColor);
@@ -47,12 +95,12 @@ function DisplayQAList(props) {
           return (prevIndex + 1) % (questionArray.length * 3);
         });
       }, 3000);
-      // CALCULATE POINTS
-      // If player got points, ++
-      // maybe balloons at end or if + point?
-      // setScore()
     });
   }, [socket]);
+  // TESTING AREA
+
+  // TESTING AREA
+
   useEffect(() => {
     if (
       correctAnswerColor === "red" &&
@@ -114,44 +162,24 @@ function DisplayQAList(props) {
         ].answerD
       );
     }
-    // console.log(
-    //   "corrAColor: ",
-    //   correctAnswerColor,
-    //   "corrA: ",
-    //   questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-    //     currentQuestionIndex % 3
-    //   ].correctAnswer,
-    //   "FloatA: ",
-    //   floatingAnswer
-    // );
   }, [currentQuestionIndex, correctAnswerColor, floatingAnswer]);
-  // }, [currentQuestionIndex, correctAnswerColor]);
-
-  // currentQuestionIndex;
   useEffect(() => {
-    //  function checkCords(localPlayers) {
     const result = {};
-    // console.log(result)
     for (const username in players) {
       const { spriteX, spriteY } = players[username];
       const shape = getShape(spriteX, spriteY);
       result[username] = shape;
     }
-    //  return result;
     setCurrLocs((currLocs) => result);
-    //  }
   }, [players]);
+  useEffect(() => {
+    if (shouldRun) {
+      checkPlayers();
+    } else {
+      setShouldRun(true);
+    }
+  }, [checkIndex]);
 
-  // function checkCords(localPlayers) {
-  //   const result = {};
-  //   // console.log(result)
-  //   for (const username in localPlayers) {
-  //     const { spriteX, spriteY } = localPlayers[username];
-  //     const shape = getShape(spriteX, spriteY);
-  //     result[username] = shape;
-  //   }
-  //   return result;
-  // }
   useState(() => {
     const newQuestionArray = QAArray.playerAnswersArray.map(
       ({ username, answers }) => {
@@ -193,59 +221,46 @@ function DisplayQAList(props) {
     setLoading(false);
   }, []);
   function hideButton() {
-    setButtonHidden(true);
+    // setButtonHidden(true);
     let timer;
     timer = setTimeout(() => {
       setButtonHidden(false);
-    }, 7000);
+      // }, 7000);
+    }, 0);
+
     return () => clearTimeout(timer);
   }
   function checkPlayers() {
-    // console.log(currLocs);
+    // let points = [];
+    setMessage("");
+    let popup = [];
+    let points = {};
+    // setMessage("");
     for (const username in players) {
-      // for (const [player, color] of Object.entries(players)) {
-      // console.log(currLocs[username]);
       if (currLocs[username] === correctAnswerColor) {
-        // setScoreboard({
-        //   ...scoreboard,
-        //   username: username,
-        //   points: points++,
-        // });
-        const updatedScores = {
-          ...scores,
-          [username]: (scores[username] || 0) + 1,
-        };
-        setScores(updatedScores);
-        setScoreboard({
-          ...scoreboard,
-          username: username,
-          points: updatedScores[username],
-        });
+        popup.push(`${username} +1\n`);
+        points[username] = 1;
+      } else {
+        points[username] = 0;
+        popup.push(`${username} +0\n`);
       }
     }
-  }
-  useEffect(() => {
-    for (const username in players) {
-      const updatedScores = {
-        ...scores,
-        [username]: (scores[username] || 0) + 0,
-      };
-      setScores(updatedScores);
-      setScoreboard({
-        ...scoreboard,
-        username: username,
-        points: updatedScores[username],
-      });
+    const updatedScores = { ...scores };
+    for (const username in points) {
+      updatedScores[username] =
+        (updatedScores[username] || 0) + points[username];
     }
-  }, [players]);
-
+    setScores(updatedScores);
+    const updatedScoreboard = Object.entries(updatedScores).map(
+      ([username, points]) => ({ username, points })
+    );
+    setScoreboard(updatedScoreboard);
+    setHideMessage(false);
+    setMessage(popup);
+  }
   const handleNextQuestion = () => {
-    // console.log(currLocs, "correct: ", correctAnswerColor);
-    checkPlayers();
-    // return result;
+    // checkPlayers();
     hideButton();
-    // HIDE BUTTON FOR A FEW SECONDS AFTER CLICK
-    // const nextIndex = (currentQuestionIndex + 1) % questionArray.length;
     const totalQuestions = questionArray.length * 3;
 
     if (totalQuestions === currentQuestionIndex + 1) {
@@ -253,6 +268,7 @@ function DisplayQAList(props) {
         roomName: roomName,
         // SCORE DATA HERE
       });
+      setShowScoreboard(true);
     } else {
       socket.emit("go next question", {
         roomName: roomName,
@@ -282,233 +298,258 @@ function DisplayQAList(props) {
     }
   }
   return (
-    <div className="relative">
-      {!showScoreboard && !showCorrectAnswer && (
-        <button
-          onClick={() => setShowScoreboard(!showScoreboard)}
-          className="absolute top-0 left-0 text-[red]"
-        >
-          Score
-        </button>
+    <>
+      {message && !hideMessage && (
+        <div className="flex flex-col absolute w-[10rem] top-[50%] left-[10%] text-white/70">
+          {message.map((point, index) => (
+            <span key={index}>
+              {point}
+              <br />
+            </span>
+          ))}
+        </div>
       )}
-      {showScoreboard && !showCorrectAnswer && (
-        <div className="absolute text-center left-0 right-0 top-0 bottom-0 bg-neutral-900/95 z-[999]">
-          <p>Scoreboard</p>
+
+      <div className="relative">
+        {!showScoreboard && !showCorrectAnswer && (
           <button
             onClick={() => setShowScoreboard(!showScoreboard)}
             className="absolute top-0 left-0 text-[red]"
           >
-            Close
+            Score
           </button>
-          <div className="max-h-calc-full-minus-x overflow-y-auto ">
-            {Object.entries(scores).map(([username, score]) => (
-              <p key={username}>{`${username}: ${score}`}</p>
-            ))}
+        )}
+        {/* {message && !hideMessage && (
+        <div className="absolute bottom-[-100px] right-[33vw]">{message}</div>
+      )} */}
+        {showScoreboard && !showCorrectAnswer && (
+          <div className="rounded mb-4 absolute text-center left-0 right-0 top-0 bottom-0 bg-neutral-900/95 z-[999]">
+            <p>Scoreboard</p>
+            <button
+              onClick={() => setShowScoreboard(!showScoreboard)}
+              className="absolute top-0 left-0 text-[red]"
+            >
+              Close
+            </button>
+            <div className="max-h-calc-full-minus-x overflow-y-auto ">
+              {Object.entries(scores).map(([username, score]) => (
+                <p key={username}>{`${username}: ${score}`}</p>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
-      {!loading && !gameOver && !showCorrectAnswer && (
-        <div className="flex flex-col gap-2 text-center max-w-[90vw]">
-          <h3>
-            {questionArray[Math.floor(currentQuestionIndex / 3)].username ===
-            username ? (
-              <p>YOU</p>
-            ) : (
-              <>
-                {questionArray[Math.floor(currentQuestionIndex / 3)].username}
-              </>
-            )}
-          </h3>
-          <h3>
-            {
-              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                currentQuestionIndex % 3
-              ].question
-            }
-          </h3>
-          {/* Ans 1 */}
-          <p className="bg-[red] border-4 border-black rounded">
-            {correctAnswerColor === "red" && (
-              <>
-                {
-                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                    currentQuestionIndex % 3
-                  ].correctAnswer
-                }
-              </>
-            )}
-            {correctAnswerColor !== "red" &&
-              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                currentQuestionIndex % 3
-              ].answerA ===
-                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                  currentQuestionIndex % 3
-                ].correctAnswer && <>{floatingAnswer}</>}
-
-            {correctAnswerColor !== "red" &&
-              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                currentQuestionIndex % 3
-              ].answerA !==
-                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                  currentQuestionIndex % 3
-                ].correctAnswer && (
-                <>
-                  {
-                    questionArray[Math.floor(currentQuestionIndex / 3)]
-                      .questions[currentQuestionIndex % 3].answerA
-                  }
-                </>
-              )}
-          </p>
-
-          {/* Ans 2 */}
-          <p className="bg-[blue] border-4 border-black rounded">
-            {correctAnswerColor === "blue" && (
-              <>
-                {
-                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                    currentQuestionIndex % 3
-                  ].correctAnswer
-                }
-              </>
-            )}
-            {correctAnswerColor !== "blue" &&
-              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                currentQuestionIndex % 3
-              ].answerB ===
-                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                  currentQuestionIndex % 3
-                ].correctAnswer && <>{floatingAnswer}</>}
-
-            {correctAnswerColor !== "blue" &&
-              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                currentQuestionIndex % 3
-              ].answerB !==
-                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                  currentQuestionIndex % 3
-                ].correctAnswer && (
-                <>
-                  {
-                    questionArray[Math.floor(currentQuestionIndex / 3)]
-                      .questions[currentQuestionIndex % 3].answerB
-                  }
-                </>
-              )}
-          </p>
-          {/* Ans 3 */}
-          <p className="bg-[green] border-4 border-black rounded">
-            {correctAnswerColor === "green" && (
-              <>
-                {
-                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                    currentQuestionIndex % 3
-                  ].correctAnswer
-                }
-              </>
-            )}
-            {correctAnswerColor !== "green" &&
-              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                currentQuestionIndex % 3
-              ].answerC ===
-                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                  currentQuestionIndex % 3
-                ].correctAnswer && <>{floatingAnswer}</>}
-            {correctAnswerColor !== "green" &&
-              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                currentQuestionIndex % 3
-              ].answerC !==
-                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                  currentQuestionIndex % 3
-                ].correctAnswer && (
-                <>
-                  {
-                    questionArray[Math.floor(currentQuestionIndex / 3)]
-                      .questions[currentQuestionIndex % 3].answerC
-                  }
-                </>
-              )}
-          </p>
-          {/* Ans 4 */}
-          <p className="bg-[orange] border-4 border-black rounded">
-            {correctAnswerColor === "orange" && (
-              <>
-                {
-                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                    currentQuestionIndex % 3
-                  ].correctAnswer
-                }
-              </>
-            )}
-            {correctAnswerColor !== "orange" &&
-              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                currentQuestionIndex % 3
-              ].answerD ===
-                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                  currentQuestionIndex % 3
-                ].correctAnswer && <>{floatingAnswer}</>}
-            {correctAnswerColor !== "orange" &&
-              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                currentQuestionIndex % 3
-              ].answerD !==
-                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                  currentQuestionIndex % 3
-                ].correctAnswer && (
-                <>
-                  {
-                    questionArray[Math.floor(currentQuestionIndex / 3)]
-                      .questions[currentQuestionIndex % 3].answerD
-                  }
-                </>
-              )}
-          </p>
-          {isHost && buttonHidden && <div className="h-[24.01px] mb-1"></div>}
-          {isHost && !buttonHidden && (
-            <>
-              <button
-                className="w-fit mx-auto mb-1"
-                onClick={handleNextQuestion}
-              >
-                Next Question
-              </button>
-            </>
-          )}
-          {!isHost && <div className="h-1"></div>}
-        </div>
-      )}{" "}
-      {showCorrectAnswer && (
-        <div
-          className={
-            isHost
-              ? `h-[246.65px] flex items-center justify-end w-full flex-col`
-              : `h-[222.64px] flex items-center justify-end w-full flex-col`
-          }
-        >
-          <h3>
-            <div className="flex">
+        )}
+        {!loading && !gameOver && !showCorrectAnswer && (
+          <div className="flex flex-col gap-2 text-center max-w-[90vw]">
+            <h3>
               {questionArray[Math.floor(currentQuestionIndex / 3)].username ===
               username ? (
-                <>YOU</>
+                <p>YOU</p>
               ) : (
                 <>
                   {questionArray[Math.floor(currentQuestionIndex / 3)].username}
                 </>
-              )}{" "}
-              Said:
-            </div>
-          </h3>
-          <p
-            className={`bg-[${correctAnswerColor}] mb-4 min-w-[430px] w-full text-center border-4 border-black rounded`}
-          >
-            {
-              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                currentQuestionIndex % 3
-              ].correctAnswer
+              )}
+            </h3>
+            <h3>
+              {
+                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                  currentQuestionIndex % 3
+                ].question
+              }
+            </h3>
+            {/* Ans 1 */}
+            <p className="bg-[red] border-4 border-black rounded">
+              {correctAnswerColor === "red" && (
+                <>
+                  {
+                    questionArray[Math.floor(currentQuestionIndex / 3)]
+                      .questions[currentQuestionIndex % 3].correctAnswer
+                  }
+                </>
+              )}
+              {correctAnswerColor !== "red" &&
+                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                  currentQuestionIndex % 3
+                ].answerA ===
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].correctAnswer && <>{floatingAnswer}</>}
+
+              {correctAnswerColor !== "red" &&
+                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                  currentQuestionIndex % 3
+                ].answerA !==
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].correctAnswer && (
+                  <>
+                    {
+                      questionArray[Math.floor(currentQuestionIndex / 3)]
+                        .questions[currentQuestionIndex % 3].answerA
+                    }
+                  </>
+                )}
+            </p>
+
+            {/* Ans 2 */}
+            <p className="bg-[blue] border-4 border-black rounded">
+              {correctAnswerColor === "blue" && (
+                <>
+                  {
+                    questionArray[Math.floor(currentQuestionIndex / 3)]
+                      .questions[currentQuestionIndex % 3].correctAnswer
+                  }
+                </>
+              )}
+              {correctAnswerColor !== "blue" &&
+                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                  currentQuestionIndex % 3
+                ].answerB ===
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].correctAnswer && <>{floatingAnswer}</>}
+
+              {correctAnswerColor !== "blue" &&
+                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                  currentQuestionIndex % 3
+                ].answerB !==
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].correctAnswer && (
+                  <>
+                    {
+                      questionArray[Math.floor(currentQuestionIndex / 3)]
+                        .questions[currentQuestionIndex % 3].answerB
+                    }
+                  </>
+                )}
+            </p>
+            {/* Ans 3 */}
+            <p className="bg-[green] border-4 border-black rounded">
+              {correctAnswerColor === "green" && (
+                <>
+                  {
+                    questionArray[Math.floor(currentQuestionIndex / 3)]
+                      .questions[currentQuestionIndex % 3].correctAnswer
+                  }
+                </>
+              )}
+              {correctAnswerColor !== "green" &&
+                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                  currentQuestionIndex % 3
+                ].answerC ===
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].correctAnswer && <>{floatingAnswer}</>}
+              {correctAnswerColor !== "green" &&
+                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                  currentQuestionIndex % 3
+                ].answerC !==
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].correctAnswer && (
+                  <>
+                    {
+                      questionArray[Math.floor(currentQuestionIndex / 3)]
+                        .questions[currentQuestionIndex % 3].answerC
+                    }
+                  </>
+                )}
+            </p>
+            {/* Ans 4 */}
+            <p className="bg-[orange] border-4 border-black rounded">
+              {correctAnswerColor === "orange" && (
+                <>
+                  {
+                    questionArray[Math.floor(currentQuestionIndex / 3)]
+                      .questions[currentQuestionIndex % 3].correctAnswer
+                  }
+                </>
+              )}
+              {correctAnswerColor !== "orange" &&
+                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                  currentQuestionIndex % 3
+                ].answerD ===
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].correctAnswer && <>{floatingAnswer}</>}
+              {correctAnswerColor !== "orange" &&
+                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                  currentQuestionIndex % 3
+                ].answerD !==
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].correctAnswer && (
+                  <>
+                    {
+                      questionArray[Math.floor(currentQuestionIndex / 3)]
+                        .questions[currentQuestionIndex % 3].answerD
+                    }
+                  </>
+                )}
+            </p>
+            {isHost && buttonHidden && <div className="h-[24.01px] mb-1"></div>}
+            {isHost && !buttonHidden && (
+              <>
+                <button
+                  className="w-fit mx-auto mb-1"
+                  onClick={handleNextQuestion}
+                >
+                  Next Question
+                </button>
+              </>
+            )}
+            {!isHost && <div className="h-1"></div>}
+          </div>
+        )}{" "}
+        {showCorrectAnswer && (
+          <div
+            className={
+              isHost
+                ? `h-[246.65px] flex items-center justify-end w-full flex-col`
+                : `h-[222.64px] flex items-center justify-end w-full flex-col`
             }
-          </p>
-        </div>
-      )}
-      {gameOver && <>Game Over!</>}
-    </div>
+          >
+            <h3>
+              <div className="flex">
+                {questionArray[Math.floor(currentQuestionIndex / 3)]
+                  .username === username ? (
+                  <>YOU</>
+                ) : (
+                  <>
+                    {
+                      questionArray[Math.floor(currentQuestionIndex / 3)]
+                        .username
+                    }
+                  </>
+                )}{" "}
+                Said:
+              </div>
+            </h3>
+            <p
+              className={`bg-[${correctAnswerColor}] mb-4 min-w-[430px] w-full text-center border-4 border-black rounded`}
+            >
+              {
+                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                  currentQuestionIndex % 3
+                ].correctAnswer
+              }
+            </p>
+          </div>
+        )}
+        {gameOver && (
+          <div
+            className={
+              isHost
+                ? `h-[246.65px] w-[340px] items-end flex justify-center`
+                : `h-[222.64px] w-[340px] items-end flex justify-center`
+            }
+          >
+            Game Over!
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
