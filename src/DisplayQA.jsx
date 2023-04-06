@@ -27,6 +27,9 @@ function DisplayQAList(props) {
   const [checkIndex, setCheckIndex] = useState(0);
   const [message, setMessage] = useState("");
   const [hideMessage, setHideMessage] = useState(true);
+  const [checkWinner, setCheckWinner] = useState(false);
+  const [winners, setWinners] = useState();
+  const [winnersLoaded, setWinnersLoaded] = useState(false);
   // const [showCelebration, setShowCelebration] = useState(false);
   // const [celebrateName, setCelebrateName] = useState();
 
@@ -56,32 +59,10 @@ function DisplayQAList(props) {
       setTimeout(() => {
         setShowCorrectAnswer(false);
         setGameOver(true);
-        // Check to see who won
-        // Get the array of values from the object
-        const values = Object.values(scores);
-
-        // Find the maximum value in the array
-        const max = Math.max(...values);
-
-        // Find the indices of the maximum values in the array
-        const indices = values.reduce((acc, val, i) => {
-          if (val === max) {
-            acc.push(i);
-          }
-          return acc;
-        }, []);
-
-        // Get the usernames corresponding to the maximum values
-        const winners = indices.map((index) => Object.keys(scores)[index]);
-
-        // Check if there is a tie
-        if (winners.length === 1) {
-          console.log(`The winner is ${winners[0]}`);
-        } else {
-          console.log(`There is a tie between ${winners.join(" and ")}`);
-        }
+        setCheckWinner(true);
       }, 3000);
     });
+
     socket.on("next question", (data) => {
       setShowCorrectAnswer(true);
       // checkPlayers();
@@ -97,9 +78,31 @@ function DisplayQAList(props) {
       }, 3000);
     });
   }, [socket]);
-  // TESTING AREA
 
-  // TESTING AREA
+  useEffect(() => {
+    if (checkWinner) {
+      const values = Object.values(scores);
+      // Find the maximum value in the array
+      const max = Math.max(...values);
+      // Find the indices of the maximum values in the array
+      const indices = values.reduce((acc, val, i) => {
+        if (val === max) {
+          acc.push(i);
+        }
+        return acc;
+      }, []);
+      // Get the usernames corresponding to the maximum values
+      const winners = indices.map((index) => Object.keys(scores)[index]);
+      // Check if there is a tie
+      if (winners.length === 1) {
+        // console.log(`The winner is ${winners[0]}`);
+      } else {
+        // console.log(`There is a tie between ${winners.join(" and ")}`);
+      }
+      setWinners(winners);
+      setWinnersLoaded(true);
+    }
+  }, [checkWinner]);
 
   useEffect(() => {
     if (
@@ -537,15 +540,32 @@ function DisplayQAList(props) {
             </p>
           </div>
         )}
-        {gameOver && (
+        {gameOver && winnersLoaded && (
           <div
             className={
               isHost
-                ? `h-[246.65px] w-[340px] items-end flex justify-center`
-                : `h-[222.64px] w-[340px] items-end flex justify-center`
+                ? `h-[246.65px] w-[340px] items-center flex justify-end flex-col`
+                : `h-[222.64px] w-[340px] items-center flex justify-end flex-col`
             }
           >
-            Game Over!
+            {winners.length > 1 && (
+              <div className="text-center flex justify-center flex-col">
+                <p>WINNERS:</p>
+                {winners.map((point, index) => (
+                  <span key={index}>
+                    {point}
+                    <br />
+                  </span>
+                ))}
+              </div>
+            )}
+            {winners.length === 1 && (
+              <div>
+                <p>WINNER:</p>
+                <p>{winners}</p>
+              </div>
+            )}
+            <p>Game Over!</p>
           </div>
         )}
       </div>
