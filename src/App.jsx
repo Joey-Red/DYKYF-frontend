@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import CanvasComponent from "./CanvasComponent";
 import JoinOrHost from "./JoinOrHost";
 import io from "socket.io-client";
-const socket = io("http://localhost:3001");
+const socket = io("https://capable-paletas-590a43.netlify.app");
 import bannerTransparent from "./assets/misc/BannerTransparent.png";
 import useRandomWord from "./useRandomWord";
 import RoomProvider from "./RoomProvider";
