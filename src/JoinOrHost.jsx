@@ -25,6 +25,8 @@ function JoinOrHost(props) {
     roomSize,
     socketId,
     setQAArray,
+    correctAnswerColor,
+    setCorrectAnswerColor,
   } = props;
   useEffect(() => {
     socket.on("connect", () => {
@@ -112,6 +114,8 @@ function JoinOrHost(props) {
                   roomSize={roomSize}
                   socketId={socketId}
                   setQAArray={setQAArray}
+                  correctAnswerColor={correctAnswerColor}
+                  setCorrectAnswerColor={setCorrectAnswerColor}
                 />
               </div>
             ) : (

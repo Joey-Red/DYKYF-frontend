@@ -12,7 +12,6 @@ import vitaStill from "./assets/charbuttons/vitaStill.png";
 import mortStill from "./assets/charbuttons/mortStill.png";
 import douxStill from "./assets/charbuttons/douxStill.png";
 import { wrapText } from "./canvasTextWrapper";
-import shadowBox from "./assets/misc/shadow_2.png";
 import {
   lineWidth,
   redRect,
@@ -29,7 +28,17 @@ import {
 import DisplayQA from "./DisplayQA";
 
 function CanvasComponent(props) {
-  let { roomName, username, isHost, socket, io, socketId, QAArray } = props;
+  let {
+    roomName,
+    username,
+    isHost,
+    socket,
+    io,
+    socketId,
+    QAArray,
+    correctAnswerColor,
+    setCorrectAnswerColor,
+  } = props;
   let [chosenChar, setChosenChar] = useState(tard);
   let [chosenCharMirror, setChosenCharMirror] = useState(tardMirror);
   const [players, setPlayers] = useState({});
@@ -42,6 +51,7 @@ function CanvasComponent(props) {
   let [showColorMenu, setShowColorMenu] = useState(false);
   const [size, setSize] = useState("small");
   const [updatedPlayers, setUpdatedPlayers] = useState(null);
+  const [hideName, setHideName] = useState(false);
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
   // const imageRef = useRef(null);
@@ -55,10 +65,7 @@ function CanvasComponent(props) {
   const douxMirrorRef = useRef(null);
   const tardMirrorRef = useRef(null);
 
-  const shadowRef = useRef(null);
   const usernameRef = useRef("");
-  // let canvasWidth = 1000;
-  // let canvasHeight = 1000;
   const numFrames = 24;
   let canvasWidth = 900;
   let canvasHeight = 900;
@@ -137,12 +144,20 @@ function CanvasComponent(props) {
       setSize("small");
       canvasHeight = 300;
       canvasWidth = 300;
+      let rX = Math.floor(Math.random() * 250) + 15;
+      let rY = Math.floor(Math.random() * 250) + 15;
+      setSpriteX(rX);
+      setSpriteY(rY);
     } else {
       canvas.height = 900;
       canvas.width = 900;
       setSize("large");
       canvasHeight = 900;
       canvasWidth = 900;
+      let rX = Math.floor(Math.random() * 850) + 15;
+      let rY = Math.floor(Math.random() * 850) + 15;
+      setSpriteX(rX);
+      setSpriteY(rY);
     }
   }, [size]);
 
@@ -221,6 +236,13 @@ function CanvasComponent(props) {
       let framesToPlay;
       if (size === "small") {
         ctx.font = "15px LemonMilk";
+        if (username === player.username) {
+        }
+        if (username === player.username) {
+          ctx.fillStyle = "black";
+        } else {
+          ctx.fillStyle = "white";
+        }
         ctx.fillText(
           player.username,
           (player.spriteX + 24) / 3,
@@ -228,6 +250,11 @@ function CanvasComponent(props) {
         );
       } else {
         ctx.font = "20px LemonMilk";
+        if (username === player.username) {
+          ctx.fillStyle = "black";
+        } else {
+          ctx.fillStyle = "white";
+        }
         ctx.fillText(player.username, player.spriteX + 24, player.spriteY - 8);
       }
 
@@ -269,7 +296,6 @@ function CanvasComponent(props) {
         image = doux;
         mirror = douxMirror;
       }
-
       const x = frameIndex * player.frameWidth;
       if (size === "small") {
         if (player.isRunning) {
@@ -401,7 +427,6 @@ function CanvasComponent(props) {
   useEffect(() => {
     let image = douxRef.current;
     let mirror = douxMirrorRef.current;
-    let shadow = shadowRef.current;
     const frameWidth = image?.width / numFrames;
     const frameHeight = image?.height;
     const x = frame * frameWidth;
@@ -431,7 +456,6 @@ function CanvasComponent(props) {
   function handleKeyDown(event) {
     let image = douxRef.current;
     let mirror = douxMirrorRef.current;
-    let shadow = shadowRef.current;
     const frameWidth = image.width / numFrames;
     const frameHeight = 24;
     const x = frame * frameWidth;
@@ -532,7 +556,6 @@ function CanvasComponent(props) {
   }
 
   function handleImageLoad() {
-    const shadow = new Image();
     const mortImg = new Image();
     const vitaImg = new Image();
     const douxImg = new Image();
@@ -560,9 +583,6 @@ function CanvasComponent(props) {
     vitaMirrorRef.current = vitaImgMirror;
     tardMirrorRef.current = tardImgMirror;
     douxMirrorRef.current = douxImgMirror;
-
-    shadow.src = shadowBox;
-    shadowRef.current = shadow;
   }
   useEffect(() => {
     handleImageLoad();
@@ -571,6 +591,12 @@ function CanvasComponent(props) {
   useEffect(() => {
     drawSprite();
   }, [frame, players]);
+  useEffect(() => {
+    let timer;
+    timer = setTimeout(() => {
+      setHideName(true);
+    }, 4000);
+  }, []);
 
   return (
     <div className="w-full max-h-screen">
@@ -631,7 +657,15 @@ function CanvasComponent(props) {
           roomName={roomName}
           players={players}
           updatedPlayers={updatedPlayers}
+          username={username}
+          correctAnswerColor={correctAnswerColor}
+          setCorrectAnswerColor={setCorrectAnswerColor}
         />
+        {!hideName && (
+          <p className="bg-black border-4 border-white p-4 rounded absolute text-white font-[5rem]">
+            You are {username}
+          </p>
+        )}
         <canvas
           className="bg-neutral-900  border-white border-2 rounded"
           ref={canvasRef}

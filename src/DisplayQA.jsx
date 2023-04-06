@@ -1,35 +1,189 @@
 import React, { useEffect, useState } from "react";
 import { redRect, blueRect, greenRect, orangeRect } from "./canvasVariables";
 function DisplayQAList(props) {
-  const { QAArray, isHost, socket, io, roomName, players } = props;
+  const {
+    QAArray,
+    isHost,
+    socket,
+    io,
+    roomName,
+    players,
+    username,
+    correctAnswerColor,
+    setCorrectAnswerColor,
+  } = props;
   const [questionArray, setQuestionArray] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [gameOver, setGameOver] = useState(false);
   const [currLocs, setCurrLocs] = useState({});
   const [buttonHidden, setButtonHidden] = useState(true);
+  const [floatingAnswer, setFloatingAnswer] = useState("");
   useEffect(() => {
     let timer;
     timer = setTimeout(() => {
       setButtonHidden(false);
-    }, 5000);
+    }, 2000);
   }, []);
-
+  // let floatingAnswer;
   useEffect(() => {
+    // console.log(
+    //   correctAnswerColor,
+    //   questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+    //     currentQuestionIndex % 3
+    //   ].correctAnswer
+    // );
+    // let corrAns =
+    //   questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+    //     currentQuestionIndex % 3
+    //   ].correctAnswer;
+    // let floatVar =
+    //   questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+    //     currentQuestionIndex % 3
+    //   ];
     socket.on("game over", (data) => {
       setGameOver(true);
     });
     socket.on("next question", (data) => {
+      // console.log(floatVar);
       // console.log(checkCords(players));
-      console.log(currLocs);
+      // console.log(data.correctAnswerColor);
+
+      setCorrectAnswerColor(data.corrAnswerColor);
       setCurrentQuestionIndex((prevIndex) => {
         return (prevIndex + 1) % (questionArray.length * 3);
       });
     });
-    setCurrentQuestionIndex(
-      (currentQuestionIndex + 1) % (questionArray.length * 3)
-    );
   }, [socket]);
+  useEffect(() => {
+    if (
+      correctAnswerColor === "red" &&
+      questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+        currentQuestionIndex % 3
+      ].correctAnswer !==
+        questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+          currentQuestionIndex % 3
+        ].answerA
+    ) {
+      setFloatingAnswer(
+        questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+          currentQuestionIndex % 3
+        ].answerA
+      );
+    }
+    if (
+      correctAnswerColor === "blue" &&
+      questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+        currentQuestionIndex % 3
+      ].correctAnswer !==
+        questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+          currentQuestionIndex % 3
+        ].answerB
+    ) {
+      setFloatingAnswer(
+        questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+          currentQuestionIndex % 3
+        ].answerB
+      );
+    }
+    if (
+      correctAnswerColor === "green" &&
+      questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+        currentQuestionIndex % 3
+      ].correctAnswer !==
+        questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+          currentQuestionIndex % 3
+        ].answerC
+    ) {
+      setFloatingAnswer(
+        questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+          currentQuestionIndex % 3
+        ].answerC
+      );
+    }
+    if (
+      correctAnswerColor === "orange" &&
+      questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+        currentQuestionIndex % 3
+      ].correctAnswer !==
+        questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+          currentQuestionIndex % 3
+        ].answerD
+    ) {
+      setFloatingAnswer(
+        questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+          currentQuestionIndex % 3
+        ].answerD
+      );
+    }
+    // if (
+    //   correctAnswerColor === "red" &&
+    //   questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+    //     currentQuestionIndex % 3
+    //   ].correctAnswer !==
+    //     questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+    //       currentQuestionIndex % 3
+    //     ].answerA
+    // ) {
+    //   floatingAnswer =
+    //     questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+    //       currentQuestionIndex % 3
+    //     ].answerA;
+    // }
+    // if (
+    //   correctAnswerColor === "blue" &&
+    //   questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+    //     currentQuestionIndex % 3
+    //   ].correctAnswer !==
+    //     questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+    //       currentQuestionIndex % 3
+    //     ].answerB
+    // ) {
+    //   floatingAnswer =
+    //     questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+    //       currentQuestionIndex % 3
+    //     ].answerB;
+    // }
+    // if (
+    //   correctAnswerColor === "green" &&
+    //   questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+    //     currentQuestionIndex % 3
+    //   ].correctAnswer !==
+    //     questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+    //       currentQuestionIndex % 3
+    //     ].answerC
+    // ) {
+    //   floatingAnswer =
+    //     questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+    //       currentQuestionIndex % 3
+    //     ].answerC;
+    // }
+    // if (
+    //   correctAnswerColor === "orange" &&
+    //   questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+    //     currentQuestionIndex % 3
+    //   ].correctAnswer !==
+    //     questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+    //       currentQuestionIndex % 3
+    //     ].answerD
+    // ) {
+    //   floatingAnswer =
+    //     questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+    //       currentQuestionIndex % 3
+    //     ].answerD;
+    // }
+    console.log(
+      "corrAColor: ",
+      correctAnswerColor,
+      "corrA: ",
+      questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+        currentQuestionIndex % 3
+      ].correctAnswer,
+      "FloatA: ",
+      floatingAnswer
+    );
+  }, [currentQuestionIndex, correctAnswerColor, floatingAnswer]);
+  // }, [currentQuestionIndex, correctAnswerColor]);
 
   // currentQuestionIndex;
   useEffect(() => {
@@ -49,7 +203,6 @@ function DisplayQAList(props) {
   function checkCords(localPlayers) {
     const result = {};
     // console.log(result)
-    console.log("lp cc: ", localPlayers);
     for (const username in localPlayers) {
       const { spriteX, spriteY } = localPlayers[username];
       const shape = getShape(spriteX, spriteY);
@@ -69,6 +222,7 @@ function DisplayQAList(props) {
               answerA: questionOne.a,
               answerB: questionOne.b,
               answerC: questionOne.c,
+              answerD: questionOne.d,
               correctAnswer: answers.answerOne,
             },
             {
@@ -76,6 +230,8 @@ function DisplayQAList(props) {
               answerA: questionTwo.a,
               answerB: questionTwo.b,
               answerC: questionTwo.c,
+              answerD: questionTwo.d,
+
               correctAnswer: answers.answerTwo,
             },
             {
@@ -83,6 +239,8 @@ function DisplayQAList(props) {
               answerA: questionThree.a,
               answerB: questionThree.b,
               answerC: questionThree.c,
+              answerD: questionThree.d,
+
               correctAnswer: answers.answerThree,
             },
           ],
@@ -101,6 +259,7 @@ function DisplayQAList(props) {
     return () => clearTimeout(timer);
   }
   const handleNextQuestion = () => {
+    console.log(currLocs);
     hideButton();
     // HIDE BUTTON FOR A FEW SECONDS AFTER CLICK
     const nextIndex = (currentQuestionIndex + 1) % questionArray.length;
@@ -144,7 +303,14 @@ function DisplayQAList(props) {
       {!loading && !gameOver && (
         <div className="flex flex-col gap-2 text-center">
           <h3>
-            {questionArray[Math.floor(currentQuestionIndex / 3)].username}
+            {questionArray[Math.floor(currentQuestionIndex / 3)].username ===
+            username ? (
+              <p>YOU</p>
+            ) : (
+              <>
+                {questionArray[Math.floor(currentQuestionIndex / 3)].username}
+              </>
+            )}
           </h3>
           <h3>
             {
@@ -153,27 +319,217 @@ function DisplayQAList(props) {
               ].question
             }
           </h3>
+          {/* Ans 1 */}
           <p className="bg-[red] border-4 border-black rounded">
-            {
+            {correctAnswerColor === "red" && (
+              <>
+                {
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].correctAnswer
+                }
+              </>
+            )}
+            {correctAnswerColor !== "red" &&
               questionArray[Math.floor(currentQuestionIndex / 3)].questions[
                 currentQuestionIndex % 3
-              ].answerA
-            }
+              ].answerA ===
+                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                  currentQuestionIndex % 3
+                ].correctAnswer && <>{floatingAnswer}</>}
+
+            {correctAnswerColor !== "red" &&
+              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                currentQuestionIndex % 3
+              ].answerA !==
+                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                  currentQuestionIndex % 3
+                ].correctAnswer && (
+                <>
+                  {
+                    questionArray[Math.floor(currentQuestionIndex / 3)]
+                      .questions[currentQuestionIndex % 3].answerA
+                  }
+                </>
+              )}
           </p>
+
+          {/* Ans 2 */}
           <p className="bg-[blue] border-4 border-black rounded">
-            {
+            {correctAnswerColor === "blue" && (
+              <>
+                {
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].correctAnswer
+                }
+              </>
+            )}
+            {correctAnswerColor !== "blue" &&
               questionArray[Math.floor(currentQuestionIndex / 3)].questions[
                 currentQuestionIndex % 3
-              ].answerB
-            }
+              ].answerB ===
+                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                  currentQuestionIndex % 3
+                ].correctAnswer && <>{floatingAnswer}</>}
+
+            {correctAnswerColor !== "blue" &&
+              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                currentQuestionIndex % 3
+              ].answerB !==
+                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                  currentQuestionIndex % 3
+                ].correctAnswer && (
+                <>
+                  {
+                    questionArray[Math.floor(currentQuestionIndex / 3)]
+                      .questions[currentQuestionIndex % 3].answerB
+                  }
+                </>
+              )}
+          </p>
+          {/* Ans 3 */}
+          <p className="bg-[green] border-4 border-black rounded">
+            {correctAnswerColor === "green" && (
+              <>
+                {
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].correctAnswer
+                }
+              </>
+            )}
+            {correctAnswerColor !== "green" &&
+              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                currentQuestionIndex % 3
+              ].answerC ===
+                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                  currentQuestionIndex % 3
+                ].correctAnswer && <>{floatingAnswer}</>}
+            {correctAnswerColor !== "green" &&
+              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                currentQuestionIndex % 3
+              ].answerC !==
+                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                  currentQuestionIndex % 3
+                ].correctAnswer && (
+                <>
+                  {
+                    questionArray[Math.floor(currentQuestionIndex / 3)]
+                      .questions[currentQuestionIndex % 3].answerC
+                  }
+                </>
+              )}
+          </p>
+          {/* Ans 4 */}
+          <p className="bg-[orange] border-4 border-black rounded">
+            {correctAnswerColor === "orange" && (
+              <>
+                {
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].correctAnswer
+                }
+              </>
+            )}
+            {correctAnswerColor !== "orange" &&
+              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                currentQuestionIndex % 3
+              ].answerD ===
+                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                  currentQuestionIndex % 3
+                ].correctAnswer && <>{floatingAnswer}</>}
+            {correctAnswerColor !== "orange" &&
+              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                currentQuestionIndex % 3
+              ].answerD !==
+                questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                  currentQuestionIndex % 3
+                ].correctAnswer && (
+                <>
+                  {
+                    questionArray[Math.floor(currentQuestionIndex / 3)]
+                      .questions[currentQuestionIndex % 3].answerD
+                  }
+                </>
+              )}
+          </p>
+          {/* {correctAnswerColor === "red" ? (
+              // need to move inside the P element
+              <>
+                {
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].correctAnswer
+                }
+              </>
+            ) : (
+              <>
+                {
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].answerA
+                }
+              </>
+            )} */}
+
+          {/* <p className="bg-[blue] border-4 border-black rounded">
+            {correctAnswerColor === "blue" ? (
+              <>
+                {
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].correctAnswer
+                }
+              </>
+            ) : (
+              <>
+                {
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].answerB
+                }
+              </>
+            )}
           </p>
           <p className="bg-[green] border-4 border-black rounded">
-            {
-              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                currentQuestionIndex % 3
-              ].answerC
-            }
+            {correctAnswerColor === "green" ? (
+              <>
+                {
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].correctAnswer
+                }
+              </>
+            ) : (
+              <>
+                {
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].answerC
+                }
+              </>
+            )}
           </p>
+          <p className="bg-[orange] border-4 border-black rounded">
+            {correctAnswerColor === "orange" ? (
+              <>
+                {
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].correctAnswer
+                }
+              </>
+            ) : (
+              <>
+                {
+                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                    currentQuestionIndex % 3
+                  ].answerD
+                }
+              </>
+            )}
+          </p> */}
           {isHost && buttonHidden && <div className="h-[24.01px] mb-1"></div>}
           {isHost && !buttonHidden && (
             <>

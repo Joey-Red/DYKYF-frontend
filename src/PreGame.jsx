@@ -7,9 +7,9 @@ import ChatRoom from "./ChatRoom";
 function PreGame(props) {
   let [questions, setQuestions] = useState([]);
   let [loaded, setLoaded] = useState(false);
-  let [answerOne, setAnswerOne] = useState("APPLE");
-  let [answerTwo, setAnswerTwo] = useState("BAN");
-  let [answerThree, setAnswerThree] = useState("ORA");
+  let [answerOne, setAnswerOne] = useState("");
+  let [answerTwo, setAnswerTwo] = useState("");
+  let [answerThree, setAnswerThree] = useState("");
   let [answersSubmitted, setAnswersSubmitted] = useState(false);
   let [buttonDisabled, setButtonDisabled] = useState(true);
   let [clickedOneA, setClickedOneA] = useState(false);
@@ -18,13 +18,20 @@ function PreGame(props) {
   let [clickedTwoA, setClickedTwoA] = useState(false);
   let [clickedTwoB, setClickedTwoB] = useState(false);
   let [clickedTwoC, setClickedTwoC] = useState(false);
+  let [clickedTwoD, setClickedTwoD] = useState(false);
   let [clickedThreeA, setClickedThreeA] = useState(false);
   let [clickedThreeB, setClickedThreeB] = useState(false);
   let [clickedThreeC, setClickedThreeC] = useState(false);
+  let [clickedThreeD, setClickedThreeD] = useState(false);
   let [dOne, setDOne] = useState(false);
   let [dTwo, setDTwo] = useState(false);
-  let [dThree, setDThree] = useState(false);
+  let [eOne, setEOne] = useState(false);
+  let [eTwo, setETwo] = useState(false);
+  let [eThree, setEThree] = useState(false);
+  let [clickedOneD, setClickedOneD] = useState(false);
+  let [dThree, setClickedDThree] = useState(false);
   let [players, setPlayers] = useState([]);
+  let [error, setError] = useState(false);
   // let [customUsername, setCustomUsername] = useState("Anon");
   let [allPlayersReady, setAllPlayersReady] = useState(false);
   let {
@@ -37,6 +44,8 @@ function PreGame(props) {
     roomSize,
     setRoomSize,
     setQAArray,
+    correctAnswerColor,
+    setCorrectAnswerColor,
   } = props;
   useEffect(() => {
     axios
@@ -48,6 +57,7 @@ function PreGame(props) {
       })
       .catch(function (err) {
         console.log(err);
+        setError(true);
       });
   }, []);
   useEffect(() => {
@@ -69,6 +79,7 @@ function PreGame(props) {
       setQAArray(data);
     });
     socket.on("start game", (data) => {
+      setCorrectAnswerColor(data.corrAnswerColor);
       setRoomSize(data.roomSize);
       setQuestionsAnswered(true);
     });
@@ -158,7 +169,7 @@ function PreGame(props) {
           </div>
         </div>
       )}
-      {loaded && !answersSubmitted && (
+      {loaded && !answersSubmitted && !error && (
         <div className="">
           <div className="flex justify-evenly gap-4 w-full">
             <div className="flex flex-col">
@@ -173,6 +184,7 @@ function PreGame(props) {
                     setClickedOneA(true);
                     setClickedOneB(false);
                     setClickedOneC(false);
+                    setClickedOneD(false);
                     setDOne(false);
                   }}
                 >
@@ -187,6 +199,7 @@ function PreGame(props) {
                     setClickedOneB(true);
                     setClickedOneA(false);
                     setClickedOneC(false);
+                    setClickedOneD(false);
                     setDOne(false);
                   }}
                 >
@@ -201,27 +214,44 @@ function PreGame(props) {
                     setClickedOneC(true);
                     setClickedOneB(false);
                     setClickedOneA(false);
+                    setClickedOneD(false);
                     setDOne(false);
                   }}
                 >
                   c) {questions[0].c}
                 </button>
+                <button
+                  className={
+                    clickedOneD ? "text-start text-red-500" : "text-start"
+                  }
+                  onClick={() => {
+                    setAnswerOne(questions[0].d);
+                    setClickedOneC(false);
+                    setClickedOneB(false);
+                    setClickedOneA(false);
+                    setClickedOneD(true);
+                    setDOne(false);
+                  }}
+                >
+                  d) {questions[0].d}
+                </button>
                 <li className="flex">
-                  <p className={dOne ? "text-red-500" : "text-white"}>d) </p>
+                  <p className={eOne ? "text-red-500" : "text-white"}>e) </p>
                   <input
                     type="text"
                     placeholder="Answer"
                     className={
-                      dOne
+                      eOne
                         ? "rounded w-full ml-1 text-red-900"
                         : "rounded w-full ml-1 text-black"
                     }
                     onChange={(e) => {
                       setAnswerOne(e.target.value);
-                      setDOne(true);
+                      setEOne(true);
                       setClickedOneC(false);
                       setClickedOneB(false);
                       setClickedOneA(false);
+                      setClickedOneD(false);
                     }}
                   />
                 </li>
@@ -240,6 +270,7 @@ function PreGame(props) {
                     setClickedTwoB(false);
                     setClickedTwoC(false);
                     setDTwo(false);
+                    setClickedTwoD(false);
                   }}
                 >
                   a) {questions[1].a}
@@ -254,6 +285,7 @@ function PreGame(props) {
                     setClickedTwoA(false);
                     setClickedTwoC(false);
                     setDTwo(false);
+                    setClickedTwoD(false);
                   }}
                 >
                   b) {questions[1].b}
@@ -268,26 +300,43 @@ function PreGame(props) {
                     setClickedTwoB(false);
                     setClickedTwoA(false);
                     setDTwo(false);
+                    setClickedTwoD(false);
                   }}
                 >
                   c) {questions[1].c}
                 </button>
+                <button
+                  className={
+                    clickedTwoD ? "text-start text-red-500" : "text-start"
+                  }
+                  onClick={() => {
+                    setAnswerTwo(questions[1].d);
+                    setClickedTwoC(false);
+                    setClickedTwoB(false);
+                    setClickedTwoA(false);
+                    setDTwo(false);
+                    setClickedTwoD(true);
+                  }}
+                >
+                  d) {questions[1].d}
+                </button>
                 <li className="flex">
-                  <p className={dTwo ? "text-red-500" : "text-white"}>d) </p>
+                  <p className={eTwo ? "text-red-500" : "text-white"}>E) </p>
                   <input
                     type="text"
                     placeholder="Answer"
                     className={
-                      dTwo
+                      eTwo
                         ? "rounded w-full ml-1 text-red-900"
                         : "rounded w-full ml-1 text-black"
                     }
                     onChange={(e) => {
                       setAnswerTwo(e.target.value);
-                      setDTwo(true);
+                      setETwo(true);
                       setClickedTwoC(false);
                       setClickedTwoB(false);
                       setClickedTwoA(false);
+                      setClickedTwoD(false);
                     }}
                   />
                 </li>
@@ -305,7 +354,8 @@ function PreGame(props) {
                     setClickedThreeA(true);
                     setClickedThreeB(false);
                     setClickedThreeC(false);
-                    setDThree(false);
+                    setEThree(false);
+                    setClickedDThree(false);
                   }}
                 >
                   a) {questions[2].a}
@@ -319,7 +369,8 @@ function PreGame(props) {
                     setClickedThreeB(true);
                     setClickedThreeA(false);
                     setClickedThreeC(false);
-                    setDThree(false);
+                    setEThree(false);
+                    setClickedDThree(false);
                   }}
                 >
                   b) {questions[2].b}
@@ -333,27 +384,43 @@ function PreGame(props) {
                     setClickedThreeC(true);
                     setClickedThreeB(false);
                     setClickedThreeA(false);
-                    setDThree(false);
+                    setEThree(false);
+                    setClickedDThree(false);
                   }}
                 >
                   c) {questions[2].c}
                 </button>
+                <button
+                  className={dThree ? "text-start text-red-500" : "text-start"}
+                  onClick={() => {
+                    setAnswerThree(questions[2].d);
+                    setClickedThreeC(false);
+                    setClickedThreeB(false);
+                    setClickedThreeA(false);
+                    setClickedThreeA(false);
+                    setEThree(false);
+                    setClickedDThree(true);
+                  }}
+                >
+                  d) {questions[2].d}
+                </button>
                 <li className="flex">
-                  <p className={dThree ? "text-red-500" : "text-white"}>d)</p>
+                  <p className={eThree ? "text-red-500" : "text-white"}>E)</p>
                   <input
                     type="text"
                     placeholder="Answer"
                     className={
-                      dThree
+                      eThree
                         ? "rounded w-full ml-1 text-red-900"
                         : "rounded w-full ml-1 text-black"
                     }
                     onChange={(e) => {
                       setAnswerThree(e.target.value);
-                      setDThree(true);
+                      setEThree(true);
                       setClickedThreeC(false);
                       setClickedThreeB(false);
                       setClickedThreeA(false);
+                      setClickedDThree(false);
                     }}
                   />
                 </li>
@@ -370,6 +437,7 @@ function PreGame(props) {
           </button>
         </div>
       )}
+      {error && <>Error, please refresh page.</>}
       {answersSubmitted && !isHost && !allPlayersReady && (
         <div className="pt-4 text-style flex items-center justify-center">
           <LoadingSpinner />

@@ -14,6 +14,7 @@ function App() {
   let [roomName, setRoomName] = useState("");
   let [roomSize, setRoomSize] = useState();
   let [QAArray, setQAArray] = useState([]);
+  let [correctAnswerColor, setCorrectAnswerColor] = useState();
   const words = useRandomWord();
 
   useEffect(() => {
@@ -40,6 +41,8 @@ function App() {
             roomSize={roomSize}
             socketId={socket.id}
             setQAArray={setQAArray}
+            correctAnswerColor={correctAnswerColor}
+            setCorrectAnswerColor={setCorrectAnswerColor}
           />
         </div>
         {foundRoom && questionsAnswered && (
@@ -58,6 +61,8 @@ function App() {
               roomName={roomName}
               roomSize={roomSize}
               QAArray={QAArray}
+              correctAnswerColor={correctAnswerColor}
+              setCorrectAnswerColor={setCorrectAnswerColor}
             />
           </div>
         )}
