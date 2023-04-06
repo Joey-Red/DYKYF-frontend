@@ -49,7 +49,8 @@ function PreGame(props) {
   } = props;
   useEffect(() => {
     axios
-      .get("http://localhost:3001/get-questions")
+      // .get("http://localhost:3001/get-questions")
+      .get("https://capable-paletas-590a43.netlify.app")
       .then((res) => {
         setQuestions(res.data);
         setLoaded(true);
