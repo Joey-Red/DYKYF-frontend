@@ -170,7 +170,9 @@ function Bots(props) {
     );
     ctx.font = "20px LemonMilk";
     ctx.fillText(username, spriteX + 24, spriteY - 8);
+    ctx.save();
     if (direction === "right") {
+      // ctx.scale(2, 2);
       ctx.drawImage(
         image,
         x,
@@ -290,7 +292,7 @@ function Bots(props) {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     ctxRef.current = ctx;
-    if (window.innerWidth < 899) {
+    if (window.innerWidth < 899 || window.innerHeight < 899) {
       canvasHeight = 300;
       canvasWidth = 300;
     } else {

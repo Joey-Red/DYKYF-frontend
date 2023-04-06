@@ -41,6 +41,48 @@ export const circle = {
   radius: 216,
   color: "#171717",
 };
+export const redMedRect = {
+  x: 33.34,
+  y: 33.34,
+  width: 240,
+  height: 240,
+  radius: 8,
+  color: "red",
+};
+
+export const blueMedRect = {
+  x: 330,
+  y: 33.34,
+  width: 240,
+  height: 240,
+  radius: 8,
+  color: "blue",
+};
+
+export const greenMedRect = {
+  x: 33.34,
+  y: 330,
+  width: 240,
+  height: 240,
+  radius: 8,
+  color: "green",
+};
+
+export const orangeMedRect = {
+  x: 330,
+  y: 330,
+  width: 240,
+  height: 240,
+  radius: 8,
+  color: "orange",
+};
+
+export const medCircle = {
+  x: 300,
+  y: 300,
+  radius: 142,
+  color: "#171717",
+};
 export const redSmallRect = {
   x: 16.67,
   y: 16.67,

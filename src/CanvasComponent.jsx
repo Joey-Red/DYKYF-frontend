@@ -24,6 +24,11 @@ import {
   greenSmallRect,
   orangeSmallRect,
   smallCircle,
+  redMedRect,
+  blueMedRect,
+  greenMedRect,
+  orangeMedRect,
+  medCircle,
 } from "./canvasVariables";
 import DisplayQA from "./DisplayQA";
 
@@ -52,6 +57,8 @@ function CanvasComponent(props) {
   const [size, setSize] = useState("small");
   const [updatedPlayers, setUpdatedPlayers] = useState(null);
   const [hideName, setHideName] = useState(false);
+  const [isWinner, setIsWinner] = useState(false);
+  const [scale, setScale] = useState(1);
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
   // const imageRef = useRef(null);
@@ -132,20 +139,51 @@ function CanvasComponent(props) {
     });
     socket.on("disconnect", () => {});
   }, []);
+  useEffect(() => {
+    let char = Math.floor(Math.random() * 4) + 1;
+    if (char === 1) {
+      setChosenChar(mort);
+    }
+    if (char === 2) {
+      setChosenChar(tard);
+    }
+    if (char === 3) {
+      setChosenChar(doux);
+    }
+    if (char === 4) {
+      setChosenChar(vita);
+    }
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     ctxRef.current = ctx;
     usernameRef.current = username;
-    if (window.innerWidth < 899) {
+    if (
+      document.documentElement.clientWidth < 600 ||
+      document.documentElement.clientHeight < 850
+    ) {
       canvas.height = 300;
       canvas.width = 300;
       setSize("small");
       canvasHeight = 300;
       canvasWidth = 300;
-      let rX = Math.floor(Math.random() * 250) + 15;
-      let rY = Math.floor(Math.random() * 250) + 15;
+      let rX = Math.floor(Math.random() * 875) + 15;
+      let rY = Math.floor(Math.random() * 875) + 15;
+      setSpriteX(rX);
+      setSpriteY(rY);
+    } else if (
+      document.documentElement.clientWidth < 899 ||
+      document.documentElement.clientHeight < 1149
+    ) {
+      canvas.height = 600;
+      canvas.width = 600;
+      setSize("medium");
+      canvasHeight = 600;
+      canvasWidth = 600;
+      let rX = Math.floor(Math.random() * 575) + 15;
+      let rY = Math.floor(Math.random() * 575) + 15;
       setSpriteX(rX);
       setSpriteY(rY);
     } else {
@@ -154,16 +192,16 @@ function CanvasComponent(props) {
       setSize("large");
       canvasHeight = 900;
       canvasWidth = 900;
-      let rX = Math.floor(Math.random() * 850) + 15;
-      let rY = Math.floor(Math.random() * 850) + 15;
+      let rX = Math.floor(Math.random() * 875) + 15;
+      let rY = Math.floor(Math.random() * 875) + 15;
       setSpriteX(rX);
       setSpriteY(rY);
     }
-  }, [size]);
-
-  function playGame(QA) {
-    // console.log(QA);
-  }
+  }, [
+    size,
+    document.documentElement.clientHeight,
+    document.documentElement.clientWidth,
+  ]);
 
   function drawSprite() {
     const ctx = ctxRef.current;
@@ -185,8 +223,17 @@ function CanvasComponent(props) {
       orangeSmallRect,
       smallCircle,
     ];
+    const medShapes = [
+      redMedRect,
+      blueMedRect,
+      greenMedRect,
+      orangeMedRect,
+      medCircle,
+    ];
     if (size === "small") {
       shapeSizes = smallShapes;
+    } else if (size === "medium") {
+      shapeSizes = medShapes;
     } else {
       shapeSizes = shapes;
     }
@@ -221,6 +268,8 @@ function CanvasComponent(props) {
     const textLength = (text.length / 5) * 1.5;
     if (size === "small") {
       ctx.fillText("DYKYF?", 150, 150);
+    } else if (size === "medium") {
+      ctx.fillText("DYKYF?", 300, 300);
     } else {
       wrapText(
         ctx,
@@ -247,6 +296,20 @@ function CanvasComponent(props) {
           player.username,
           (player.spriteX + 24) / 3,
           (player.spriteY - 8) / 3.3
+        );
+      } else if (size === "medium") {
+        ctx.font = "18px LemonMilk";
+        if (username === player.username) {
+        }
+        if (username === player.username) {
+          ctx.fillStyle = "black";
+        } else {
+          ctx.fillStyle = "white";
+        }
+        ctx.fillText(
+          player.username,
+          (player.spriteX + 24) / 1.5,
+          (player.spriteY - 8) / 1.5
         );
       } else {
         ctx.font = "20px LemonMilk";
@@ -296,6 +359,7 @@ function CanvasComponent(props) {
         image = doux;
         mirror = douxMirror;
       }
+
       const x = frameIndex * player.frameWidth;
       if (size === "small") {
         if (player.isRunning) {
@@ -350,6 +414,66 @@ function CanvasComponent(props) {
               player.frameHeight,
               player.spriteX / 3.3,
               player.spriteY / 3.3,
+              player.spriteWidth,
+              player.spriteHeight
+            );
+          }
+        }
+      }
+      // here
+      else if (size === "medium") {
+        if (player.isRunning) {
+          if (player.direction === "left") {
+            ctx.drawImage(
+              mirror,
+              // player.frameWidth * runningFrames[frame % numFrames],
+              x,
+              0,
+              player.frameWidth,
+              player.frameHeight,
+              player.spriteX / 1.5,
+              player.spriteY / 1.5,
+              player.spriteWidth,
+              player.spriteHeight
+            );
+          } else {
+            ctx.drawImage(
+              image,
+              // player.frameWidth * runningFrames[frame % numFrames],
+              x,
+              0,
+              player.frameWidth,
+              player.frameHeight,
+              player.spriteX / 1.5,
+              player.spriteY / 1.5,
+              player.spriteWidth,
+              player.spriteHeight
+            );
+          }
+        } else {
+          if (player.direction === "left") {
+            ctx.drawImage(
+              mirror,
+              // player.frameWidth * idleFrames[frame % numFrames],
+              x,
+              0,
+              player.frameWidth,
+              player.frameHeight,
+              player.spriteX / 1.5,
+              player.spriteY / 1.5,
+              player.spriteWidth,
+              player.spriteHeight
+            );
+          } else {
+            ctx.drawImage(
+              image,
+              // player.frameWidth * idleFrames[frame % numFrames],
+              x,
+              0,
+              player.frameWidth,
+              player.frameHeight,
+              player.spriteX / 1.5,
+              player.spriteY / 1.5,
               player.spriteWidth,
               player.spriteHeight
             );
@@ -460,7 +584,7 @@ function CanvasComponent(props) {
     const frameHeight = 24;
     const x = frame * frameWidth;
     const y = 0;
-    const speed = 10;
+    const speed = 20;
     switch (event.code) {
       case "ArrowRight":
         if (spriteX < canvasWidth - spriteWidth) {
@@ -586,7 +710,7 @@ function CanvasComponent(props) {
   }
   useEffect(() => {
     handleImageLoad();
-    playGame(QAArray);
+    // playGame(QAArray);
   }, [chosenChar]);
   useEffect(() => {
     drawSprite();
@@ -660,6 +784,8 @@ function CanvasComponent(props) {
           username={username}
           correctAnswerColor={correctAnswerColor}
           setCorrectAnswerColor={setCorrectAnswerColor}
+          isWinner={isWinner}
+          setIsWinner={setIsWinner}
         />
         {!hideName && (
           <p className="bg-black border-4 border-white p-4 rounded absolute text-white font-[5rem]">

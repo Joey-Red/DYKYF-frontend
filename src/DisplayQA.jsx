@@ -11,6 +11,7 @@ function DisplayQAList(props) {
     username,
     correctAnswerColor,
     setCorrectAnswerColor,
+    setIsWinner,
   } = props;
   const [questionArray, setQuestionArray] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -30,15 +31,12 @@ function DisplayQAList(props) {
   const [checkWinner, setCheckWinner] = useState(false);
   const [winners, setWinners] = useState();
   const [winnersLoaded, setWinnersLoaded] = useState(false);
-  // const [showCelebration, setShowCelebration] = useState(false);
-  // const [celebrateName, setCelebrateName] = useState();
 
   useEffect(() => {
     let timer;
     timer = setTimeout(() => {
       setButtonHidden(false);
-      // }, 9000);
-    }, 0);
+    }, 9000);
   }, []);
   useEffect(() => {
     let timer;
@@ -46,13 +44,10 @@ function DisplayQAList(props) {
       setHideMessage(true);
     }, 2000);
   }, [message]);
-  // let floatingAnswer;
 
   useEffect(() => {
     socket.on("game over", (data) => {
-      // setGameOver(true);
       setShowCorrectAnswer(true);
-      // checkPlayers();
       setCheckIndex((prevIndex) => {
         return (prevIndex + 1) % (questionArray.length * 3);
       });
@@ -65,7 +60,6 @@ function DisplayQAList(props) {
 
     socket.on("next question", (data) => {
       setShowCorrectAnswer(true);
-      // checkPlayers();
       setCheckIndex((prevIndex) => {
         return (prevIndex + 1) % (questionArray.length * 3);
       });
@@ -94,10 +88,8 @@ function DisplayQAList(props) {
       // Get the usernames corresponding to the maximum values
       const winners = indices.map((index) => Object.keys(scores)[index]);
       // Check if there is a tie
-      if (winners.length === 1) {
-        // console.log(`The winner is ${winners[0]}`);
-      } else {
-        // console.log(`There is a tie between ${winners.join(" and ")}`);
+      if (winners.includes(username)) {
+        setIsWinner(true);
       }
       setWinners(winners);
       setWinnersLoaded(true);
@@ -224,26 +216,30 @@ function DisplayQAList(props) {
     setLoading(false);
   }, []);
   function hideButton() {
-    // setButtonHidden(true);
+    setButtonHidden(true);
     let timer;
     timer = setTimeout(() => {
       setButtonHidden(false);
-      // }, 7000);
-    }, 0);
+    }, 7000);
 
     return () => clearTimeout(timer);
   }
   function checkPlayers() {
-    // let points = [];
     setMessage("");
     let popup = [];
     let points = {};
-    // setMessage("");
     for (const username in players) {
-      if (currLocs[username] === correctAnswerColor) {
+      if (
+        currLocs[username] === correctAnswerColor &&
+        questionArray[Math.floor(currentQuestionIndex / 3)].username !==
+          username
+      ) {
         popup.push(`${username} +1\n`);
         points[username] = 1;
-      } else {
+      } else if (
+        questionArray[Math.floor(currentQuestionIndex / 3)].username !==
+        username
+      ) {
         points[username] = 0;
         popup.push(`${username} +0\n`);
       }
@@ -269,7 +265,6 @@ function DisplayQAList(props) {
     if (totalQuestions === currentQuestionIndex + 1) {
       socket.emit("game over", {
         roomName: roomName,
-        // SCORE DATA HERE
       });
       setShowScoreboard(true);
     } else {
@@ -322,9 +317,6 @@ function DisplayQAList(props) {
             Score
           </button>
         )}
-        {/* {message && !hideMessage && (
-        <div className="absolute bottom-[-100px] right-[33vw]">{message}</div>
-      )} */}
         {showScoreboard && !showCorrectAnswer && (
           <div className="rounded mb-4 absolute text-center left-0 right-0 top-0 bottom-0 bg-neutral-900/95 z-[999]">
             <p>Scoreboard</p>
@@ -560,7 +552,7 @@ function DisplayQAList(props) {
               </div>
             )}
             {winners.length === 1 && (
-              <div>
+              <div className="text-center">
                 <p>WINNER:</p>
                 <p>{winners}</p>
               </div>

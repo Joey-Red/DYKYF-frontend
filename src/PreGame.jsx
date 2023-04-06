@@ -108,6 +108,9 @@ function PreGame(props) {
       answerTwo === undefined ||
       answerThree === null ||
       answerThree === undefined ||
+      answerOne === "" ||
+      answerThree === "" ||
+      answerTwo === "" ||
       answersSubmitted === true
     ) {
       setButtonDisabled(true);
@@ -428,8 +431,7 @@ function PreGame(props) {
             </div>
           </div>
           <button
-            // disabled={buttonDisabled}
-            // onClick={() => doneAnswering()}
+            disabled={buttonDisabled}
             onClick={() => doneAnswering()}
             className="mt-4 p-2 mx-auto w-full rounded bg-[#FF0000] font-bold border-black border-4 text-black text-2xl"
           >
@@ -464,13 +466,6 @@ function PreGame(props) {
           Start Game (You're the host)
         </button>
       )}
-      {/* <ChatRoom
-        socket={socket}
-        io={io}
-        roomName={roomName}
-        // customUsername={customUsername}
-        username={username}
-      /> */}
     </div>
   );
 }
