@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { redRect, blueRect, greenRect, orangeRect } from "./canvasVariables";
 function DisplayQAList(props) {
   const {
@@ -19,28 +19,19 @@ function DisplayQAList(props) {
   const [currLocs, setCurrLocs] = useState({});
   const [buttonHidden, setButtonHidden] = useState(true);
   const [floatingAnswer, setFloatingAnswer] = useState("");
+  const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
+  const [scoreboard, setScoreboard] = useState();
+  const [scores, setScores] = useState({});
+  const [showScoreboard, setShowScoreboard] = useState(false);
+
   useEffect(() => {
     let timer;
     timer = setTimeout(() => {
       setButtonHidden(false);
-    }, 2000);
+    }, 9000);
   }, []);
   // let floatingAnswer;
   useEffect(() => {
-    // console.log(
-    //   correctAnswerColor,
-    //   questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-    //     currentQuestionIndex % 3
-    //   ].correctAnswer
-    // );
-    // let corrAns =
-    //   questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-    //     currentQuestionIndex % 3
-    //   ].correctAnswer;
-    // let floatVar =
-    //   questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-    //     currentQuestionIndex % 3
-    //   ];
     socket.on("game over", (data) => {
       setGameOver(true);
     });
@@ -48,11 +39,18 @@ function DisplayQAList(props) {
       // console.log(floatVar);
       // console.log(checkCords(players));
       // console.log(data.correctAnswerColor);
-
-      setCorrectAnswerColor(data.corrAnswerColor);
-      setCurrentQuestionIndex((prevIndex) => {
-        return (prevIndex + 1) % (questionArray.length * 3);
-      });
+      setShowCorrectAnswer(true);
+      setTimeout(() => {
+        setShowCorrectAnswer(false);
+        setCorrectAnswerColor(data.corrAnswerColor);
+        setCurrentQuestionIndex((prevIndex) => {
+          return (prevIndex + 1) % (questionArray.length * 3);
+        });
+      }, 3000);
+      // CALCULATE POINTS
+      // If player got points, ++
+      // maybe balloons at end or if + point?
+      // setScore()
     });
   }, [socket]);
   useEffect(() => {
@@ -116,72 +114,16 @@ function DisplayQAList(props) {
         ].answerD
       );
     }
-    // if (
-    //   correctAnswerColor === "red" &&
+    // console.log(
+    //   "corrAColor: ",
+    //   correctAnswerColor,
+    //   "corrA: ",
     //   questionArray[Math.floor(currentQuestionIndex / 3)].questions[
     //     currentQuestionIndex % 3
-    //   ].correctAnswer !==
-    //     questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-    //       currentQuestionIndex % 3
-    //     ].answerA
-    // ) {
-    //   floatingAnswer =
-    //     questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-    //       currentQuestionIndex % 3
-    //     ].answerA;
-    // }
-    // if (
-    //   correctAnswerColor === "blue" &&
-    //   questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-    //     currentQuestionIndex % 3
-    //   ].correctAnswer !==
-    //     questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-    //       currentQuestionIndex % 3
-    //     ].answerB
-    // ) {
-    //   floatingAnswer =
-    //     questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-    //       currentQuestionIndex % 3
-    //     ].answerB;
-    // }
-    // if (
-    //   correctAnswerColor === "green" &&
-    //   questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-    //     currentQuestionIndex % 3
-    //   ].correctAnswer !==
-    //     questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-    //       currentQuestionIndex % 3
-    //     ].answerC
-    // ) {
-    //   floatingAnswer =
-    //     questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-    //       currentQuestionIndex % 3
-    //     ].answerC;
-    // }
-    // if (
-    //   correctAnswerColor === "orange" &&
-    //   questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-    //     currentQuestionIndex % 3
-    //   ].correctAnswer !==
-    //     questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-    //       currentQuestionIndex % 3
-    //     ].answerD
-    // ) {
-    //   floatingAnswer =
-    //     questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-    //       currentQuestionIndex % 3
-    //     ].answerD;
-    // }
-    console.log(
-      "corrAColor: ",
-      correctAnswerColor,
-      "corrA: ",
-      questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-        currentQuestionIndex % 3
-      ].correctAnswer,
-      "FloatA: ",
-      floatingAnswer
-    );
+    //   ].correctAnswer,
+    //   "FloatA: ",
+    //   floatingAnswer
+    // );
   }, [currentQuestionIndex, correctAnswerColor, floatingAnswer]);
   // }, [currentQuestionIndex, correctAnswerColor]);
 
@@ -200,16 +142,16 @@ function DisplayQAList(props) {
     //  }
   }, [players]);
 
-  function checkCords(localPlayers) {
-    const result = {};
-    // console.log(result)
-    for (const username in localPlayers) {
-      const { spriteX, spriteY } = localPlayers[username];
-      const shape = getShape(spriteX, spriteY);
-      result[username] = shape;
-    }
-    return result;
-  }
+  // function checkCords(localPlayers) {
+  //   const result = {};
+  //   // console.log(result)
+  //   for (const username in localPlayers) {
+  //     const { spriteX, spriteY } = localPlayers[username];
+  //     const shape = getShape(spriteX, spriteY);
+  //     result[username] = shape;
+  //   }
+  //   return result;
+  // }
   useState(() => {
     const newQuestionArray = QAArray.playerAnswersArray.map(
       ({ username, answers }) => {
@@ -255,14 +197,55 @@ function DisplayQAList(props) {
     let timer;
     timer = setTimeout(() => {
       setButtonHidden(false);
-    }, 5000);
+    }, 7000);
     return () => clearTimeout(timer);
   }
+  function checkPlayers() {
+    // console.log(currLocs);
+    for (const username in players) {
+      // for (const [player, color] of Object.entries(players)) {
+      // console.log(currLocs[username]);
+      if (currLocs[username] === correctAnswerColor) {
+        // setScoreboard({
+        //   ...scoreboard,
+        //   username: username,
+        //   points: points++,
+        // });
+        const updatedScores = {
+          ...scores,
+          [username]: (scores[username] || 0) + 1,
+        };
+        setScores(updatedScores);
+        setScoreboard({
+          ...scoreboard,
+          username: username,
+          points: updatedScores[username],
+        });
+      }
+    }
+  }
+  useEffect(() => {
+    for (const username in players) {
+      const updatedScores = {
+        ...scores,
+        [username]: (scores[username] || 0) + 0,
+      };
+      setScores(updatedScores);
+      setScoreboard({
+        ...scoreboard,
+        username: username,
+        points: updatedScores[username],
+      });
+    }
+  }, [players]);
+
   const handleNextQuestion = () => {
-    console.log(currLocs);
+    // console.log(currLocs, "correct: ", correctAnswerColor);
+    checkPlayers();
+    // return result;
     hideButton();
     // HIDE BUTTON FOR A FEW SECONDS AFTER CLICK
-    const nextIndex = (currentQuestionIndex + 1) % questionArray.length;
+    // const nextIndex = (currentQuestionIndex + 1) % questionArray.length;
     const totalQuestions = questionArray.length * 3;
 
     if (totalQuestions === currentQuestionIndex + 1) {
@@ -299,9 +282,33 @@ function DisplayQAList(props) {
     }
   }
   return (
-    <div>
-      {!loading && !gameOver && (
-        <div className="flex flex-col gap-2 text-center">
+    <div className="relative">
+      {!showScoreboard && !showCorrectAnswer && (
+        <button
+          onClick={() => setShowScoreboard(!showScoreboard)}
+          className="absolute top-0 left-0 text-[red]"
+        >
+          Score
+        </button>
+      )}
+      {showScoreboard && !showCorrectAnswer && (
+        <div className="absolute text-center left-0 right-0 top-0 bottom-0 bg-neutral-900/95 z-[999]">
+          <p>Scoreboard</p>
+          <button
+            onClick={() => setShowScoreboard(!showScoreboard)}
+            className="absolute top-0 left-0 text-[red]"
+          >
+            Close
+          </button>
+          <div className="max-h-calc-full-minus-x overflow-y-auto ">
+            {Object.entries(scores).map(([username, score]) => (
+              <p key={username}>{`${username}: ${score}`}</p>
+            ))}
+          </div>
+        </div>
+      )}
+      {!loading && !gameOver && !showCorrectAnswer && (
+        <div className="flex flex-col gap-2 text-center max-w-[90vw]">
           <h3>
             {questionArray[Math.floor(currentQuestionIndex / 3)].username ===
             username ? (
@@ -454,82 +461,6 @@ function DisplayQAList(props) {
                 </>
               )}
           </p>
-          {/* {correctAnswerColor === "red" ? (
-              // need to move inside the P element
-              <>
-                {
-                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                    currentQuestionIndex % 3
-                  ].correctAnswer
-                }
-              </>
-            ) : (
-              <>
-                {
-                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                    currentQuestionIndex % 3
-                  ].answerA
-                }
-              </>
-            )} */}
-
-          {/* <p className="bg-[blue] border-4 border-black rounded">
-            {correctAnswerColor === "blue" ? (
-              <>
-                {
-                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                    currentQuestionIndex % 3
-                  ].correctAnswer
-                }
-              </>
-            ) : (
-              <>
-                {
-                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                    currentQuestionIndex % 3
-                  ].answerB
-                }
-              </>
-            )}
-          </p>
-          <p className="bg-[green] border-4 border-black rounded">
-            {correctAnswerColor === "green" ? (
-              <>
-                {
-                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                    currentQuestionIndex % 3
-                  ].correctAnswer
-                }
-              </>
-            ) : (
-              <>
-                {
-                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                    currentQuestionIndex % 3
-                  ].answerC
-                }
-              </>
-            )}
-          </p>
-          <p className="bg-[orange] border-4 border-black rounded">
-            {correctAnswerColor === "orange" ? (
-              <>
-                {
-                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                    currentQuestionIndex % 3
-                  ].correctAnswer
-                }
-              </>
-            ) : (
-              <>
-                {
-                  questionArray[Math.floor(currentQuestionIndex / 3)].questions[
-                    currentQuestionIndex % 3
-                  ].answerD
-                }
-              </>
-            )}
-          </p> */}
           {isHost && buttonHidden && <div className="h-[24.01px] mb-1"></div>}
           {isHost && !buttonHidden && (
             <>
@@ -542,6 +473,38 @@ function DisplayQAList(props) {
             </>
           )}
           {!isHost && <div className="h-1"></div>}
+        </div>
+      )}{" "}
+      {showCorrectAnswer && (
+        <div
+          className={
+            isHost
+              ? `h-[246.65px] flex items-center justify-end w-full flex-col`
+              : `h-[222.64px] flex items-center justify-end w-full flex-col`
+          }
+        >
+          <h3>
+            <div className="flex">
+              {questionArray[Math.floor(currentQuestionIndex / 3)].username ===
+              username ? (
+                <>YOU</>
+              ) : (
+                <>
+                  {questionArray[Math.floor(currentQuestionIndex / 3)].username}
+                </>
+              )}{" "}
+              Said:
+            </div>
+          </h3>
+          <p
+            className={`bg-[${correctAnswerColor}] mb-4 min-w-[430px] w-full text-center border-4 border-black rounded`}
+          >
+            {
+              questionArray[Math.floor(currentQuestionIndex / 3)].questions[
+                currentQuestionIndex % 3
+              ].correctAnswer
+            }
+          </p>
         </div>
       )}
       {gameOver && <>Game Over!</>}

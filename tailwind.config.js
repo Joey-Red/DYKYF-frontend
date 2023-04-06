@@ -5,6 +5,10 @@ module.exports = {
     fontFamily: {
       custom: ["LemonMilk", "Permanent Marker"],
     },
-    extend: {},
+    extend: {
+      maxHeight: {
+        "calc-full-minus-x": "calc(100% - 40px)",
+      },
+    },
   },
 };
