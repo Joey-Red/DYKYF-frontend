@@ -18,7 +18,6 @@ function App() {
 
   useEffect(() => {
     setUsername(words);
-    console.log(socket);
   }, []);
 
   return (
