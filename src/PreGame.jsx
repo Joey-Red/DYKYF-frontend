@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import bannerTransparent from "./assets/misc/BannerTransparent.png";
 import LoadingSpinner from "./assets/misc/LoadingSpinner";
-import ChatRoom from "./ChatRoom";
 
 function PreGame(props) {
   let [questions, setQuestions] = useState([]);

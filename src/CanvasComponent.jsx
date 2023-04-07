@@ -345,6 +345,8 @@ function CanvasComponent(props) {
       const frameIndex = framesToPlay[Math.floor(frame / numFramesToPlay)];
       let image;
       let mirror;
+      console.log(player.chosenChar.split("/"));
+      console.log(player.chosenChar.split("/")[4]);
       let trimChar = player.chosenChar.split("/")[4].slice(0, -4);
       if (trimChar === "mort") {
         image = mort;
