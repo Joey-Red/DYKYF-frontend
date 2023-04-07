@@ -51,7 +51,7 @@ function PreGame(props) {
     axios
       // .get("http://localhost:3001/get-questions")
       .get(
-        "https://642f42d9fd33ef183cae06f3--capable-paletas-590a43.netlify.app/get-questions"
+        "Doyouknowyourfriends-env.eba-zbakckmz.us-east-1.elasticbeanstalk.com/get-questions"
       )
       .then((res) => {
         setQuestions(res.data);
