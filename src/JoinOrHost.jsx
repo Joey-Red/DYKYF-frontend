@@ -30,7 +30,6 @@ function JoinOrHost(props) {
   } = props;
   useEffect(() => {
     socket.on("connect", () => {
-      // console.log("connected to server");
       socket.emit("new player");
     });
     socket.on("disconnect", () => {

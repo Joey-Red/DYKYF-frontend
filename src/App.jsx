@@ -3,9 +3,8 @@ import CanvasComponent from "./CanvasComponent";
 import JoinOrHost from "./JoinOrHost";
 import io from "socket.io-client";
 const socket = io(
-  "https://doyouknowyourfriends-env.eba-zbakckmz.us-east-1.elasticbeanstalk.com/"
+  "http://doyouknowyourfriends-env.eba-zbakckmz.us-east-1.elasticbeanstalk.com/"
 );
-import bannerTransparent from "./assets/misc/BannerTransparent.png";
 import useRandomWord from "./useRandomWord";
 import RoomProvider from "./RoomProvider";
 function App() {
@@ -21,6 +20,7 @@ function App() {
 
   useEffect(() => {
     setUsername(words);
+    console.log(socket);
   }, []);
 
   return (
