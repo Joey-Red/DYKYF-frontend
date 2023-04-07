@@ -3,7 +3,7 @@ import CanvasComponent from "./CanvasComponent";
 import JoinOrHost from "./JoinOrHost";
 import io from "socket.io-client";
 const socket = io(
-  "http://doyouknowyourfriends-env.eba-zbakckmz.us-east-1.elasticbeanstalk.com/"
+  "https://doyouknowyourfriends-env.eba-zbakckmz.us-east-1.elasticbeanstalk.com/"
 );
 import bannerTransparent from "./assets/misc/BannerTransparent.png";
 import useRandomWord from "./useRandomWord";
