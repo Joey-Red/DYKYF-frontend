@@ -347,17 +347,19 @@ function CanvasComponent(props) {
       let mirror;
       console.log(player.chosenChar.split("/"));
       console.log(player.chosenChar.split("/")[4]);
-      let trimChar = player.chosenChar.split("/")[4].slice(0, -4);
-      if (trimChar === "mort") {
+      // ["", "assets", "tard-349914c0.png"];
+      // let trimChar = player.chosenChar.split("/")[4].slice(0, -4);
+      let trimChar = player.chosenChar.split("/")[2];
+      if (trimChar.includes("mort")) {
         image = mort;
         mirror = mortMirror;
-      } else if (trimChar === "vita") {
+      } else if (trimChar.includes("vita")) {
         image = vita;
         mirror = vitaMirror;
-      } else if (trimChar === "tard") {
+      } else if (trimChar.includes("tard")) {
         image = tard;
         mirror = tardMirror;
-      } else if (trimChar === "doux") {
+      } else if (trimChar.includes("doux")) {
         image = doux;
         mirror = douxMirror;
       }
