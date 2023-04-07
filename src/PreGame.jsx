@@ -50,9 +50,7 @@ function PreGame(props) {
   useEffect(() => {
     axios
       // .get("http://localhost:3001/get-questions")
-      .get(
-        "http://doyouknowyourfriends-env.eba-zbakckmz.us-east-1.elasticbeanstalk.com/get-questions"
-      )
+      .get("https://chambray-deep-feet.glitch.me/get-questions")
       .then((res) => {
         setQuestions(res.data);
         setLoaded(true);

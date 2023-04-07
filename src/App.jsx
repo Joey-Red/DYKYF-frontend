@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import CanvasComponent from "./CanvasComponent";
 import JoinOrHost from "./JoinOrHost";
 import io from "socket.io-client";
-const socket = io(
-  "http://doyouknowyourfriends-env.eba-zbakckmz.us-east-1.elasticbeanstalk.com/"
-);
+const socket = io("https://chambray-deep-feet.glitch.me/");
 import useRandomWord from "./useRandomWord";
 import RoomProvider from "./RoomProvider";
 function App() {
