@@ -15,6 +15,8 @@ function App() {
   let [QAArray, setQAArray] = useState([]);
   let [correctAnswerColor, setCorrectAnswerColor] = useState();
   let [connectingToServer, setConnectingToServer] = useState(true);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [attempts, setAttempts] = useState(0);
   const words = useRandomWord();
 
   useEffect(() => {
@@ -23,12 +25,24 @@ function App() {
   useEffect(() => {
     if (!socket.connected === false) {
       setConnectingToServer(false);
+      console.log("connected!");
+    } else {
+      retry();
+      console.log(retry);
     }
-  }, [socket]);
+  }, [attempts]);
+  function retry() {
+    setTimeout(() => {
+      if (setConnectingToServer) {
+        setAttempts((attempts) => attempts + 1);
+      }
+    }, 3000);
+  }
   return (
     <RoomProvider>
       <div className="min-h-screen bg-neutral-900 text-white">
         <div className="h-full items-center justify-center flex flex-col">
+          <button onClick={() => setShowTutorial(true)}>Tutorial</button>
           <JoinOrHost
             foundRoom={foundRoom}
             setFoundRoom={setFoundRoom}
