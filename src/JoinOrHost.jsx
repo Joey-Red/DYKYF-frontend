@@ -185,7 +185,9 @@ function JoinOrHost(props) {
           </div>
         )}
       </div>
-      <button onClick={() => setShowTutorial(!showTutorial)}>Tutorial</button>
+      {questionsAnswered === false && (
+        <button onClick={() => setShowTutorial(!showTutorial)}>Tutorial</button>
+      )}
       {showTutorial && (
         <div className="">
           <div className="z-50 flex justify-center absolute top-0 left-0 right-0 bottom-0 overflow-y-auto bg-neutral-900/80">
