@@ -4,11 +4,14 @@ import { v4 as uuidv4 } from "uuid";
 import bannerTransparent from "./assets/misc/BannerTransparent.png";
 import PreGame from "./PreGame";
 import Bots from "./Bots";
+import tutorialImg from "./assets/misc/thumb-1920-1154544.jpg";
+
 function JoinOrHost(props) {
   const [players, setPlayers] = useState([]);
   // const [manualJoin, setManualJoin] = useState("");
   const [roomTakenErr, setRoomTakenErr] = useState(false);
   const [roomDoesntExistErr, setRoomDoesntExistErr] = useState(false);
+
   let {
     foundRoom,
     setFoundRoom,
@@ -28,6 +31,8 @@ function JoinOrHost(props) {
     correctAnswerColor,
     setCorrectAnswerColor,
     connectingToServer,
+    showTutorial,
+    setShowTutorial,
   } = props;
   useEffect(() => {
     socket.on("connect", () => {
@@ -180,9 +185,27 @@ function JoinOrHost(props) {
           </div>
         )}
       </div>
+      <button onClick={() => setShowTutorial(!showTutorial)}>Tutorial</button>
+      {showTutorial && (
+        <div className="">
+          <div className="z-50 flex justify-center absolute top-0 left-0 right-0 bottom-0 overflow-y-auto bg-neutral-900/80">
+            <button
+              className="absolute bg-neutral-900 pt-4"
+              onClick={() => setShowTutorial(!showTutorial)}
+            >
+              <p className="text-center max-w-[375px] p-2">
+                A guessing game about friends where players answer questions
+                about each other. Highest score wins!
+              </p>
+              {showTutorial ? <>Close</> : <>Tutorial</>}
+              <img className="h-max" src={tutorialImg} alt="tutorial" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {foundRoom === false || questionsAnswered === false ? (
-        <Bots username={username} />
+        <Bots username={username} showTutorial={showTutorial} />
       ) : (
         <></>
       )}
