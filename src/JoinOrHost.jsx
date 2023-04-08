@@ -27,6 +27,7 @@ function JoinOrHost(props) {
     setQAArray,
     correctAnswerColor,
     setCorrectAnswerColor,
+    connectingToServer,
   } = props;
   useEffect(() => {
     socket.on("connect", () => {
@@ -135,12 +136,16 @@ function JoinOrHost(props) {
                       // value={roomName}
                       onChange={(event) => setRoomName(event.target.value)}
                     />
-                    <button
-                      className="p-2 border-white"
-                      onClick={handleCreateRoom}
-                    >
-                      Create
-                    </button>
+                    {connectingToServer ? (
+                      <div>Connecting, please wait.</div>
+                    ) : (
+                      <button
+                        className="p-2 border-white"
+                        onClick={handleCreateRoom}
+                      >
+                        Create
+                      </button>
+                    )}
                   </label>
                 </form>
                 <ul>
@@ -157,12 +162,16 @@ function JoinOrHost(props) {
                         // value={roomName}
                         onChange={(event) => setRoomName(event.target.value)}
                       />
-                      <button
-                        className="p-2 border-white"
-                        onClick={() => handleJoinRoom(roomName)}
-                      >
-                        Join
-                      </button>
+                      {connectingToServer ? (
+                        <div>Connecting, please wait.</div>
+                      ) : (
+                        <button
+                          className="p-2 border-white"
+                          onClick={() => handleJoinRoom(roomName)}
+                        >
+                          Join
+                        </button>
+                      )}
                     </label>
                   </li>
                 </ul>
@@ -171,6 +180,7 @@ function JoinOrHost(props) {
           </div>
         )}
       </div>
+
       {foundRoom === false || questionsAnswered === false ? (
         <Bots username={username} />
       ) : (

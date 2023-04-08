@@ -14,12 +14,17 @@ function App() {
   let [roomSize, setRoomSize] = useState();
   let [QAArray, setQAArray] = useState([]);
   let [correctAnswerColor, setCorrectAnswerColor] = useState();
+  let [connectingToServer, setConnectingToServer] = useState(true);
   const words = useRandomWord();
 
   useEffect(() => {
     setUsername(words);
   }, []);
-
+  useEffect(() => {
+    if (!socket.connected === false) {
+      setConnectingToServer(false);
+    }
+  }, [socket]);
   return (
     <RoomProvider>
       <div className="min-h-screen bg-neutral-900 text-white">
@@ -42,6 +47,7 @@ function App() {
             setQAArray={setQAArray}
             correctAnswerColor={correctAnswerColor}
             setCorrectAnswerColor={setCorrectAnswerColor}
+            connectingToServer={connectingToServer}
           />
         </div>
         {foundRoom && questionsAnswered && (
